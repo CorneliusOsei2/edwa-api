@@ -2,13 +2,13 @@ from pydantic import BaseModel, EmailStr
 from enum import Enum
 
 
-class Role(str, Enum):
-    Board: str
-    Manager: str
-    Employee: str
-    BusinessClient: str
-    IndividualClient: str
-    Investor: str
+class Role(Enum):
+    board = "Board"
+    manager = "Manager"
+    employee = "Employee"
+    businessClient = "Business Client"
+    individualClient = "Individual Client"
+    investor = "Investor"
 
 
 # Shared properties
@@ -17,7 +17,7 @@ class UserBase(BaseModel):
     is_active: bool | None = True
     is_superuser: bool = False
     full_name: str | None = None
-    role: Role
+    role: str
 
 
 # Properties to receive via API on creation

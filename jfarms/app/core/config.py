@@ -1,7 +1,15 @@
 import secrets
 from typing import Any
 
-from pydantic import AnyHttpUrl, BaseSettings, EmailStr, HttpUrl, PostgresDsn, validator
+from pydantic import (
+    AnyHttpUrl,
+    BaseSettings,
+    EmailStr,
+    HttpUrl,
+    PostgresDsn,
+    validator,
+    parse_obj_as,
+)
 
 
 class Settings(BaseSettings):
@@ -10,8 +18,8 @@ class Settings(BaseSettings):
     SECRET_KEY: str = secrets.token_urlsafe(32)
     # 60 minutes * 24 hours * 8 days = 8 days
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
-    SERVER_NAME: str
-    SERVER_HOST: AnyHttpUrl
+    SERVER_NAME: str = "jfarms"
+    SERVER_HOST: AnyHttpUrl = parse_obj_as(AnyHttpUrl, "http://127.0.0.1:8000")
     # BACKEND_CORS_ORIGINS is a JSON-formatted list of origins
     # e.g: '["http://localhost", "http://localhost:4200", "http://localhost:3000", \
     # "http://localhost:8080", "http://local.dockertoolbox.tiangolo.com"]'
@@ -26,31 +34,37 @@ class Settings(BaseSettings):
         raise ValueError(v)
 
     PROJECT_NAME: str = "jfarms"
-    SENTRY_DSN: HttpUrl | None = None
+    # SENTRY_DSN: HttpUrl | None = None
 
-    @validator("SENTRY_DSN", pre=True)
-    def sentry_dsn_can_be_blank(cls, v: str) -> str | None:
-        if len(v) == 0:
-            return None
-        return v
+    # @validator("SENTRY_DSN", pre=True)
+    # def sentry_dsn_can_be_blank(cls, v: str) -> str | None:
+    #     if len(v) == 0:
+    #         return None
+    #     return v
 
-    POSTGRES_SERVER: str
-    POSTGRES_USER: str
-    POSTGRES_PASSWORD: str
-    POSTGRES_DB: str
-    SQLALCHEMY_DATABASE_URI: PostgresDsn | None = None
+    # POSTGRES_SERVER: str = "localhost"
+    # POSTGRES_USER: str
+    # POSTGRES_PASSWORD: str
+    # POSTGRES_DB: str
+    # SQLALCHEMY_DATABASE_URI: PostgresDsn | None = None
 
-    @validator("SQLALCHEMY_DATABASE_URI", pre=True)
-    def assemble_db_connection(cls, v: str | None, values: dict[str, Any]) -> Any:
-        if isinstance(v, str):
-            return v
-        return PostgresDsn.build(
-            scheme="postgresql",
-            user=values.get("POSTGRES_USER"),
-            password=values.get("POSTGRES_PASSWORD"),
-            host=values.get("POSTGRES_SERVER"),  # type: ignore
-            path=f"/{values.get('POSTGRES_DB') or ''}",
-        )
+    SQLITE_SERVER: str = "localhost"
+    SQLITE_USER: str = "Corn"
+    SQLITE_PASSWORD: str = "corn"
+    SQLITE_DB: str = "sqlite:///../jfarms.db"
+    SQLALCHEMY_DATABASE_URI = "sqlite:///../jfarms.db"
+
+    # @validator("SQLALCHEMY_DATABASE_URI", pre=True)
+    # def assemble_db_connection(cls, v: str | None, values: dict[str, Any]) -> Any:
+    #     if isinstance(v, str):
+    #         return v
+    #     return PostgresDsn.build(
+    #         scheme="postgresql",
+    #         user=values.get("POSTGRES_USER"),
+    #         password=values.get("POSTGRES_PASSWORD"),
+    #         host=values.get("POSTGRES_SERVER"),  # type: ignore
+    #         path=f"/{values.get('POSTGRES_DB') or ''}",
+    #     )
 
     SMTP_TLS: bool = True
     SMTP_PORT: int | None = None
@@ -79,9 +93,12 @@ class Settings(BaseSettings):
         )
 
     EMAIL_TEST_USER: EmailStr = "test@example.com"  # type: ignore
-    FIRST_SUPERUSER: EmailStr
-    FIRST_SUPERUSER_PASSWORD: str
-    USERS_OPEN_REGISTRATION: bool = False
+    FIRST_SUPERUSER_EMAIL: EmailStr = parse_obj_as(
+        EmailStr, "oseiowusuboatengcornelius6@gmail.com"
+    )
+    FIRST_SUPERUSER_FULL_NAME: str = "Cornelius"
+    FIRST_SUPERUSER_PASSWORD: str = "corn"
+    USERS_OPEN_REGISTRATION: bool = True
 
     class Config:
         case_sensitive = True

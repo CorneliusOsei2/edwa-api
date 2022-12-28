@@ -1,22 +1,36 @@
 from typing import Any
+from typing_extensions import override
 
 from sqlalchemy.orm import Session
 
 from app.core.security import get_password_hash, verify_password
 from app.crud.base import CRUDBase
 from app.models.user import User
-from app.schemas.user import UserCreate, UserUpdate
+from app.schemas.user import Role, UserCreate, UserUpdate
 
 
 class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
-    def get_by_email(self, db: Session, *, email: str) -> User | None:
+    def read_by_email(self, db: Session, *, email: str) -> User | None:
         return db.query(User).filter(User.email == email).first()
 
+    def read_multi_with_role(
+        self, db: Session, *, role: Role, skip: int = 0, limit: int = 100
+    ) -> list[User]:
+        return (
+            db.query(User)
+            .filter(User.role == role.value)
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
+
+    @override
     def create(self, db: Session, *, obj_in: UserCreate) -> User:
         db_obj = User(
             email=obj_in.email,
             hashed_password=get_password_hash(obj_in.password),
             full_name=obj_in.full_name,
+            role=obj_in.role,
             is_superuser=obj_in.is_superuser,
         )
         db.add(db_obj)
@@ -24,6 +38,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         db.refresh(db_obj)
         return db_obj
 
+    @override
     def update(
         self, db: Session, *, db_obj: User, obj_in: UserUpdate | dict[str, Any]
     ) -> User:
@@ -38,7 +53,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         return super().update(db, db_obj=db_obj, obj_in=update_data)
 
     def authenticate(self, db: Session, *, email: str, password: str) -> User | None:
-        user = self.get_by_email(db, email=email)
+        user = self.read_by_email(db, email=email)
         if not user:
             return None
         if not verify_password(password, user.hashed_password):  # type: ignore  Column--warning

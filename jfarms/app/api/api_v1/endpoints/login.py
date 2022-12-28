@@ -55,7 +55,7 @@ def recover_password(email: str, db: Session = Depends(deps.get_db)) -> Any:
     """
     Password Recovery
     """
-    user = crud.user.get_by_email(db, email=email)
+    user = crud.user.read_by_email(db, email=email)
 
     if not user:
         raise HTTPException(
@@ -81,7 +81,7 @@ def reset_password(
     email = verify_password_reset_token(token)
     if not email:
         raise HTTPException(status_code=400, detail="Invalid token")
-    user = crud.user.get_by_email(db, email=email)
+    user = crud.user.read_by_email(db, email=email)
     if not user:
         raise HTTPException(
             status_code=404,
