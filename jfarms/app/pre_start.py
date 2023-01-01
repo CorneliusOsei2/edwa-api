@@ -5,7 +5,7 @@ from tenacity import retry
 from tenacity.wait import wait_fixed
 from tenacity.stop import stop_after_attempt
 
-from db.session import SessionLocal
+from app.database.session import SessionLocal
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

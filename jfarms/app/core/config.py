@@ -1,5 +1,5 @@
 import secrets
-from typing import Any
+from typing import Any, Dict, List, Optional, Union
 
 from pydantic import (
     AnyHttpUrl,
@@ -13,69 +13,63 @@ from pydantic import (
 
 
 class Settings(BaseSettings):
-    API_V1_STR: str = "/jfarms"
-    JWT_ALGORITHM = "HS256"
+    API_STR: str = "/jfarms"
     SECRET_KEY: str = secrets.token_urlsafe(32)
     # 60 minutes * 24 hours * 8 days = 8 days
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
-    SERVER_NAME: str = "jfarms"
+    SERVER_NAME: str = "localhost"
     SERVER_HOST: AnyHttpUrl = parse_obj_as(AnyHttpUrl, "http://127.0.0.1:8000")
     # BACKEND_CORS_ORIGINS is a JSON-formatted list of origins
     # e.g: '["http://localhost", "http://localhost:4200", "http://localhost:3000", \
     # "http://localhost:8080", "http://local.dockertoolbox.tiangolo.com"]'
-    BACKEND_CORS_ORIGINS: list[AnyHttpUrl] = []
+    BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
 
     @validator("BACKEND_CORS_ORIGINS", pre=True)
-    def assemble_cors_origins(cls, v: list[str] | str) -> list[str] | str:
+    def assemble_cors_origins(cls, v: Union[str, List[str]]) -> Union[List[str], str]:
         if isinstance(v, str) and not v.startswith("["):
             return [i.strip() for i in v.split(",")]
         elif isinstance(v, (list, str)):
             return v
         raise ValueError(v)
 
-    PROJECT_NAME: str = "jfarms"
-    # SENTRY_DSN: HttpUrl | None = None
+    PROJECT_NAME: str = "JFarms"
+    # SENTRY_DSN: Optional[HttpUrl] = None
 
     # @validator("SENTRY_DSN", pre=True)
-    # def sentry_dsn_can_be_blank(cls, v: str) -> str | None:
+    # def sentry_dsn_can_be_blank(cls, v: str) -> Optional[str]:
     #     if len(v) == 0:
     #         return None
     #     return v
 
-    # POSTGRES_SERVER: str = "localhost"
+    # POSTGRES_SERVER: str
     # POSTGRES_USER: str
     # POSTGRES_PASSWORD: str
     # POSTGRES_DB: str
-    # SQLALCHEMY_DATABASE_URI: PostgresDsn | None = None
+    # SQLALCHEMY_DATABASE_URI: Optional[PostgresDsn] = None
+    SQLALCHEMY_DATABASE_URI: str = "sqlite:///jfarms.db"
 
-    SQLITE_SERVER: str = "localhost"
-    SQLITE_USER: str = "Corn"
-    SQLITE_PASSWORD: str = "corn"
-    SQLITE_DB: str = "sqlite:///../jfarms.db"
-    SQLALCHEMY_DATABASE_URI = "sqlite:///../jfarms.db"
-
-    # @validator("SQLALCHEMY_DATABASE_URI", pre=True)
-    # def assemble_db_connection(cls, v: str | None, values: dict[str, Any]) -> Any:
-    #     if isinstance(v, str):
-    #         return v
-    #     return PostgresDsn.build(
-    #         scheme="postgresql",
-    #         user=values.get("POSTGRES_USER"),
-    #         password=values.get("POSTGRES_PASSWORD"),
-    #         host=values.get("POSTGRES_SERVER"),  # type: ignore
-    #         path=f"/{values.get('POSTGRES_DB') or ''}",
-    #     )
+    @validator("SQLALCHEMY_DATABASE_URI", pre=True)
+    def assemble_db_connection(cls, v: Optional[str], values: Dict[str, Any]) -> Any:
+        if isinstance(v, str):
+            return v
+        return PostgresDsn.build(
+            scheme="postgresql",
+            user=values.get("POSTGRES_USER"),
+            password=values.get("POSTGRES_PASSWORD"),
+            host=values.get("POSTGRES_SERVER"),  # type: ignore
+            path=f"/{values.get('POSTGRES_DB') or ''}",
+        )
 
     SMTP_TLS: bool = True
-    SMTP_PORT: int | None = None
-    SMTP_HOST: str | None = None
-    SMTP_USER: str | None = None
-    SMTP_PASSWORD: str | None = None
-    EMAILS_FROM_EMAIL: EmailStr | None = None
-    EMAILS_FROM_NAME: str | None = None
+    SMTP_PORT: Optional[int] = None
+    SMTP_HOST: Optional[str] = None
+    SMTP_USER: Optional[str] = None
+    SMTP_PASSWORD: Optional[str] = None
+    EMAILS_FROM_EMAIL: Optional[EmailStr] = None
+    EMAILS_FROM_NAME: Optional[str] = None
 
     @validator("EMAILS_FROM_NAME")
-    def get_project_name(cls, v: str | None, values: dict[str, Any]) -> str:
+    def get_project_name(cls, v: Optional[str], values: Dict[str, Any]) -> str:
         if not v:
             return values["PROJECT_NAME"]
         return v
@@ -85,18 +79,20 @@ class Settings(BaseSettings):
     EMAILS_ENABLED: bool = False
 
     @validator("EMAILS_ENABLED", pre=True)
-    def get_emails_enabled(cls, v: bool, values: dict[str, Any]) -> bool:
+    def get_emails_enabled(cls, v: bool, values: Dict[str, Any]) -> bool:
         return bool(
             values.get("SMTP_HOST")
             and values.get("SMTP_PORT")
             and values.get("EMAILS_FROM_EMAIL")
         )
 
-    EMAIL_TEST_USER: EmailStr = "test@example.com"  # type: ignore
-    FIRST_SUPERUSER_EMAIL: EmailStr = parse_obj_as(
-        EmailStr, "oseiowusuboatengcornelius6@gmail.com"
-    )
-    FIRST_SUPERUSER_FULL_NAME: str = "Cornelius"
+    # EMAIL_TEST_USER: EmailStr = "test@example.com"  # type: ignore
+    # FIRST_SUPERUSER: EmailStr
+    # FIRST_SUPERUSER_PASSWORD: str
+    # USERS_OPEN_REGISTRATION: bool = False
+
+    FIRST_SUPERUSER_EMAIL: EmailStr = parse_obj_as(EmailStr, "corn@email.com")
+    FIRST_SUPERUSER_FULL_NAME: str = "Corn"
     FIRST_SUPERUSER_PASSWORD: str = "corn"
     USERS_OPEN_REGISTRATION: bool = True
 

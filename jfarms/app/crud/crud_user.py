@@ -14,15 +14,9 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         return db.query(User).filter(User.email == email).first()
 
     def read_multi_with_role(
-        self, db: Session, *, role: Role, skip: int = 0, limit: int = 100
+        self, db: Session, *, role: str, skip: int = 0, limit: int = 100
     ) -> list[User]:
-        return (
-            db.query(User)
-            .filter(User.role == role.value)
-            .offset(skip)
-            .limit(limit)
-            .all()
-        )
+        return db.query(User).filter(User.role == role).offset(skip).limit(limit).all()
 
     @override
     def create(self, db: Session, *, obj_in: UserCreate) -> User:
@@ -32,6 +26,9 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             full_name=obj_in.full_name,
             role=obj_in.role,
             is_superuser=obj_in.is_superuser,
+            superior=obj_in.superior,
+            start_date=obj_in.start_date,
+            end_date=obj_in.end_date,
         )
         db.add(db_obj)
         db.commit()

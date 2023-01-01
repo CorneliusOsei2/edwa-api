@@ -1,5 +1,6 @@
 from pydantic import BaseModel, EmailStr
 from enum import Enum
+from datetime import datetime
 
 
 class Role(Enum):
@@ -16,8 +17,11 @@ class UserBase(BaseModel):
     email: EmailStr | None = None
     is_active: bool | None = True
     is_superuser: bool = False
-    full_name: str | None = None
-    role: str
+    full_name: str | None
+    role: str = Role.individualClient.value
+    superior: str | None = None
+    start_date: datetime = datetime.today()
+    end_date: datetime = datetime.today()
 
 
 # Properties to receive via API on creation

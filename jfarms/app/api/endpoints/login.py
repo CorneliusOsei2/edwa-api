@@ -5,7 +5,10 @@ from fastapi import APIRouter, Body, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
-from app import crud, models, schemas
+import app.crud as crud
+import app.models as models
+import app.schemas as schemas
+
 from app.api import deps
 from app.core import security
 from app.core.config import settings
@@ -66,7 +69,7 @@ def recover_password(email: str, db: Session = Depends(deps.get_db)) -> Any:
     send_reset_password_email(
         email_to=user.email, email=email, token=password_reset_token  # type: ignore  Column--warning
     )
-    return {"msg": "Password recovery email sent"}
+    return {"schemas.Msg": "Password recovery email sent"}
 
 
 @router.post("/reset-password/", response_model=schemas.Msg)
@@ -93,4 +96,4 @@ def reset_password(
     user.hashed_password = hashed_password  # type: ignore  Column--warning
     db.add(user)
     db.commit()
-    return {"msg": "Password updated successfully"}
+    return {"schemas.Msg": "Password updated successfully"}

@@ -5,7 +5,9 @@ from fastapi.encoders import jsonable_encoder
 from pydantic.networks import EmailStr
 from sqlalchemy.orm import Session
 
-from app import crud, models, schemas
+import app.schemas as schemas
+import app.models as models
+import app.crud as crud
 from app.api import deps
 from app.core.config import settings
 from app.schemas.user import Role
@@ -22,31 +24,39 @@ def get_employees(
     current_user: models.User = Depends(deps.get_current_active_superuser),
 ) -> Any:
     """
-    Retrieve users.
+    Retrieve Employees.
     """
     employees = crud.user.read_multi_with_role(
-        db, role=Role.employee, skip=skip, limit=limit
+        db, role=Role.employee.value, skip=skip, limit=limit
     )
     return employees
 
 
-@router.get("/business-clients", response_model=list[schemas.User])
-def get_business_clients(
+@router.post("/employees", response_model=schemas.User)
+def create_employee(
+    *,
     db: Session = Depends(deps.get_db),
-    skip: int = 0,
-    limit: int = 100,
+    user_in: schemas.Employee,
     current_user: models.User = Depends(deps.get_current_active_superuser),
 ) -> Any:
     """
-    Retrieve users.
+    Create an Employee.
     """
-    business_clients = crud.user.read_multi_with_role(
-        db, role=Role.businessClient, skip=skip, limit=limit
-    )
-    return business_clients
+    user = crud.user.read_by_email(db, email=user_in.email)
+    if user:
+        raise HTTPException(
+            status_code=400,
+            detail="The user with this username already exists in the system.",
+        )
+    user = crud.user.create(db, obj_in=schemas.UserCreate(**user_in.dict()))
+    if settings.EMAILS_ENABLED and user_in.email:
+        send_new_account_email(
+            email_to=user_in.email, username=user_in.email, password=user_in.password
+        )
+    return user
 
 
-@router.post("/users", response_model=schemas.User)
+@router.post("/client", response_model=schemas.User)
 def create_user(
     *,
     db: Session = Depends(deps.get_db),
@@ -54,7 +64,7 @@ def create_user(
     current_user: models.User = Depends(deps.get_current_active_superuser),
 ) -> Any:
     """
-    Create new user as an active superuser.
+    Create a Client.
     """
     user = crud.user.read_by_email(db, email=user_in.email)
     if user:
@@ -95,7 +105,7 @@ def update_user_me(
 
 
 @router.get("/me", response_model=schemas.User)
-def read_user_me(
+def get_current_user(
     db: Session = Depends(deps.get_db),
     current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
@@ -136,13 +146,13 @@ def create_user_open(
 
 
 @router.get("/{user_id}", response_model=schemas.User)
-def read_user_by_id(
+def get_employee_by_id(
     user_id: int,
     current_user: models.User = Depends(deps.get_current_active_user),
     db: Session = Depends(deps.get_db),
 ) -> Any:
     """
-    Get a specific user by id.
+    Get a specific Employee by id.
     """
     user = crud.user.read(db, id=user_id)
     if user == current_user:
@@ -155,7 +165,7 @@ def read_user_by_id(
 
 
 @router.put("/{user_id}", response_model=schemas.User)
-def update_user(
+def update_employee(
     *,
     db: Session = Depends(deps.get_db),
     user_id: int,
@@ -163,7 +173,7 @@ def update_user(
     current_user: models.User = Depends(deps.get_current_active_superuser),
 ) -> Any:
     """
-    Update a user.
+    Update Employee.
     """
     user = crud.user.read(db, id=user_id)
     if not user:

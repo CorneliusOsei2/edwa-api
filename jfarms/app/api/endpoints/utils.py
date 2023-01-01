@@ -3,7 +3,9 @@ from typing import Any
 from fastapi import APIRouter, Depends
 from pydantic.networks import EmailStr
 
-from app import models, schemas
+import app.models as models
+import app.schemas as schemas
+
 from app.api import deps
 
 # from app.core.celery_app import celery_app
