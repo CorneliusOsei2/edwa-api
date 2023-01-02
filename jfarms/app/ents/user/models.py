@@ -14,6 +14,5 @@ class User(Base):  # type: ignore
     is_active = Column(Boolean, default=True)
     is_superuser = Column(Boolean, default=False)
     role = Column(String, nullable=False)
-    superior = Column(Integer, nullable=True)
     start_date = Column(DateTime, nullable=True)
     end_date = Column(DateTime, nullable=True)

@@ -1,9 +1,8 @@
 from sqlalchemy.orm import Session
-from app import crud, schemas
 
 from app.core.config import settings
-from app.schemas.user import Role  # noqa: F401
-
+import app.ents.user as user
+from app.ents.user.schema import UserCreate, Role
 from app.database.base import Base
 from app.database.session import engine
 
@@ -18,13 +17,13 @@ def init_db(db: Session) -> None:
     # the tables un-commenting the next line
     Base.metadata.create_all(bind=engine)
 
-    user = crud.user.read_by_email(db, email=settings.FIRST_SUPERUSER_EMAIL)
-    if not user:
-        user_in = schemas.UserCreate(
+    superuser = user.crud.user.read_by_email(db, email=settings.FIRST_SUPERUSER_EMAIL)
+    if not superuser:
+        user_in = UserCreate(
             email=settings.FIRST_SUPERUSER_EMAIL,
             full_name=settings.FIRST_SUPERUSER_FULL_NAME,
             password=settings.FIRST_SUPERUSER_PASSWORD,
             is_superuser=True,
             role=Role.board.value,
         )
-        user = crud.user.create(db, obj_in=user_in)  # noqa: F841
+        superuser = user.crud.user.create(db, obj_in=user_in)  # noqa: F841

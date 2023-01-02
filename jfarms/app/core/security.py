@@ -6,6 +6,18 @@ from passlib.context import CryptContext
 
 from app.core.config import settings
 
+from pydantic import BaseModel
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class TokenPayload(BaseModel):
+    sub: str | None = None
+
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 

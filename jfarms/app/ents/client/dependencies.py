@@ -7,15 +7,13 @@ from jose.exceptions import JWTError
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
-import app.crud as crud
-import app.models as models
-import app.schemas as schemas
-
+from app.ents.client import crud, models
 from app.core.config import settings
+from app.core.security import TokenPayload
 from app.database.session import SessionLocal
 
 reusable_oauth2 = OAuth2PasswordBearer(
-    tokenUrl=f"{settings.API_STR}/login/access-token"
+    tokenUrl=f"{settings.API_STR}/clients/login/access-token"
 )
 
 
@@ -27,36 +25,26 @@ def get_db() -> Generator:
         db.close()
 
 
-def get_current_user(
+def get_current_client(
     db: Session = Depends(get_db), token: str = Depends(reusable_oauth2)
-) -> models.User:
+) -> models.Client:
     try:
         payload = jwt.decode(token=token, key=settings.SECRET_KEY, algorithms=["HS256"])
-        token_data = schemas.TokenPayload(**payload)
+        token_data = TokenPayload(**payload)
     except (JWTError, ValidationError):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Could not validate credentials",
         )
-    user = crud.user.read(db, id=token_data.sub)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user
+    client = crud.client.read(db, id=token_data.sub)
+    if not client:
+        raise HTTPException(status_code=404, detail="Client not found")
+    return client
 
 
 def get_current_active_user(
-    current_user: models.User = Depends(get_current_user),
-) -> models.User:
-    if not crud.user.is_active(current_user):
+    current_user: models.Client = Depends(get_current_client),
+) -> models.Client:
+    if not crud.client.is_active(current_user):
         raise HTTPException(status_code=400, detail="Inactive user")
-    return current_user
-
-
-def get_current_active_superuser(
-    current_user: models.User = Depends(get_current_user),
-) -> models.User:
-    if not crud.user.is_superuser(current_user):
-        raise HTTPException(
-            status_code=400, detail="The user doesn't have enough privileges"
-        )
     return current_user

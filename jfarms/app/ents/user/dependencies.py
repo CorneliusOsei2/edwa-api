@@ -7,15 +7,15 @@ from jose.exceptions import JWTError
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
-import app.crud as crud
-import app.models as models
-import app.schemas as schemas
+import app.ents.user.crud as crud
+from app.ents.user import User
 
-from app.core.config import settings
+from app.core import config, security
 from app.database.session import SessionLocal
+from app.ents.user.schema import Role
 
 reusable_oauth2 = OAuth2PasswordBearer(
-    tokenUrl=f"{settings.API_STR}/login/access-token"
+    tokenUrl=f"{config.settings.API_STR}/login/access-token"
 )
 
 
@@ -28,11 +28,13 @@ def get_db() -> Generator:
 
 
 def get_current_user(
-    db: Session = Depends(get_db), token: str = Depends(reusable_oauth2)
-) -> models.User:
+    db: Session = Depends(get_db), _token: str = Depends(reusable_oauth2)
+) -> User:
     try:
-        payload = jwt.decode(token=token, key=settings.SECRET_KEY, algorithms=["HS256"])
-        token_data = schemas.TokenPayload(**payload)
+        payload = jwt.decode(
+            token=_token, key=config.settings.SECRET_KEY, algorithms=["HS256"]
+        )
+        token_data = security.TokenPayload(**payload)
     except (JWTError, ValidationError):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -45,16 +47,28 @@ def get_current_user(
 
 
 def get_current_active_user(
-    current_user: models.User = Depends(get_current_user),
-) -> models.User:
+    current_user: User = Depends(get_current_user),
+) -> User:
     if not crud.user.is_active(current_user):
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
 
 
+def get_current_active_board_member(
+    current_user: User = Depends(get_current_user),
+) -> User:
+    if not crud.user.is_active(current_user):
+        raise HTTPException(status_code=400, detail="Inactive user")
+
+    if crud.user.get_role(current_user) != str(Role.board.value):
+        raise HTTPException(status_code=400, detail="Unauthorized access")
+
+    return current_user
+
+
 def get_current_active_superuser(
-    current_user: models.User = Depends(get_current_user),
-) -> models.User:
+    current_user: User = Depends(get_current_user),
+) -> User:
     if not crud.user.is_superuser(current_user):
         raise HTTPException(
             status_code=400, detail="The user doesn't have enough privileges"

@@ -4,29 +4,34 @@ from typing_extensions import override
 from sqlalchemy.orm import Session
 
 from app.core.security import get_password_hash, verify_password
-from app.crud.base import CRUDBase
-from app.models.user import User
-from app.schemas.user import Role, UserCreate, UserUpdate
+from app.ents.user import models, schema, crud
+
+from app.base import crud_base
 
 
-class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
-    def read_by_email(self, db: Session, *, email: str) -> User | None:
-        return db.query(User).filter(User.email == email).first()
+class CRUDUser(crud_base.CRUDBase[models.User, schema.UserCreate, schema.UserUpdate]):
+    def read_by_email(self, db: Session, *, email: str) -> models.User | None:
+        return db.query(models.User).filter(models.User.email == email).first()
 
     def read_multi_with_role(
         self, db: Session, *, role: str, skip: int = 0, limit: int = 100
-    ) -> list[User]:
-        return db.query(User).filter(User.role == role).offset(skip).limit(limit).all()
+    ) -> list[models.User]:
+        return (
+            db.query(models.User)
+            .filter(models.User.role == role)
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
 
     @override
-    def create(self, db: Session, *, obj_in: UserCreate) -> User:
-        db_obj = User(
+    def create(self, db: Session, *, obj_in: schema.UserCreate) -> models.User:
+        db_obj = models.User(
             email=obj_in.email,
             hashed_password=get_password_hash(obj_in.password),
             full_name=obj_in.full_name,
             role=obj_in.role,
             is_superuser=obj_in.is_superuser,
-            superior=obj_in.superior,
             start_date=obj_in.start_date,
             end_date=obj_in.end_date,
         )
@@ -37,8 +42,12 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
 
     @override
     def update(
-        self, db: Session, *, db_obj: User, obj_in: UserUpdate | dict[str, Any]
-    ) -> User:
+        self,
+        db: Session,
+        *,
+        db_obj: models.User,
+        obj_in: schema.UserUpdate | dict[str, Any]
+    ) -> models.User:
         if isinstance(obj_in, dict):
             update_data = obj_in
         else:
@@ -49,7 +58,9 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             update_data["hashed_password"] = hashed_password
         return super().update(db, db_obj=db_obj, obj_in=update_data)
 
-    def authenticate(self, db: Session, *, email: str, password: str) -> User | None:
+    def authenticate(
+        self, db: Session, *, email: str, password: str
+    ) -> models.User | None:
         user = self.read_by_email(db, email=email)
         if not user:
             return None
@@ -57,11 +68,14 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             return None
         return user
 
-    def is_active(self, user: User) -> bool:
+    def get_role(self, user: models.User) -> str:
+        return user.role  # type: ignore  Column--warning
+
+    def is_active(self, user: models.User) -> bool:
         return user.is_active  # type: ignore  Column--warning
 
-    def is_superuser(self, user: User) -> bool:
+    def is_superuser(self, user: models.User) -> bool:
         return user.is_superuser  # type: ignore  Column--warning
 
 
-user = CRUDUser(User)
+user = CRUDUser(models.User)

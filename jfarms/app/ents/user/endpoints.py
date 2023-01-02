@@ -5,63 +5,54 @@ from fastapi.encoders import jsonable_encoder
 from pydantic.networks import EmailStr
 from sqlalchemy.orm import Session
 
-import app.schemas as schemas
-import app.models as models
-import app.crud as crud
-from app.api import deps
+from app.ents.user import models, schema, crud, dependencies
+from app.ents.employee.schema import EmployeeCreate
+
+
 from app.core.config import settings
-from app.schemas.user import Role
 from app.utils import send_new_account_email
 
 router = APIRouter()
 
 
-@router.get("/employees", response_model=list[schemas.User])
-def get_employees(
-    db: Session = Depends(deps.get_db),
+@router.get("/individual-clients", response_model=list[schema.UserRead])
+def get_individual_clients(
+    db: Session = Depends(dependencies.get_db),
     skip: int = 0,
     limit: int = 100,
-    current_user: models.User = Depends(deps.get_current_active_superuser),
+    current_user: models.User = Depends(dependencies.get_current_active_superuser),
 ) -> Any:
     """
-    Retrieve Employees.
+    Retrieve Individual Clients.
     """
     employees = crud.user.read_multi_with_role(
-        db, role=Role.employee.value, skip=skip, limit=limit
+        db, role=schema.Role.individualClient.value, skip=skip, limit=limit
     )
     return employees
 
 
-@router.post("/employees", response_model=schemas.User)
-def create_employee(
-    *,
-    db: Session = Depends(deps.get_db),
-    user_in: schemas.Employee,
-    current_user: models.User = Depends(deps.get_current_active_superuser),
+@router.get("/business-clients", response_model=list[schema.UserRead])
+def get_business_clients(
+    db: Session = Depends(dependencies.get_db),
+    skip: int = 0,
+    limit: int = 100,
+    current_user: models.User = Depends(dependencies.get_current_active_superuser),
 ) -> Any:
     """
-    Create an Employee.
+    Retrieve Business Clients.
     """
-    user = crud.user.read_by_email(db, email=user_in.email)
-    if user:
-        raise HTTPException(
-            status_code=400,
-            detail="The user with this username already exists in the system.",
-        )
-    user = crud.user.create(db, obj_in=schemas.UserCreate(**user_in.dict()))
-    if settings.EMAILS_ENABLED and user_in.email:
-        send_new_account_email(
-            email_to=user_in.email, username=user_in.email, password=user_in.password
-        )
-    return user
+    business_clients = crud.user.read_multi_with_role(
+        db, role=schema.Role.businessClient.value, skip=skip, limit=limit
+    )
+    return business_clients
 
 
-@router.post("/client", response_model=schemas.User)
+@router.post("/client", response_model=schema.UserRead)
 def create_user(
     *,
-    db: Session = Depends(deps.get_db),
-    user_in: schemas.UserCreate,
-    current_user: models.User = Depends(deps.get_current_active_superuser),
+    db: Session = Depends(dependencies.get_db),
+    user_in: schema.UserCreate,
+    current_user: models.User = Depends(dependencies.get_current_active_superuser),
 ) -> Any:
     """
     Create a Client.
@@ -80,20 +71,20 @@ def create_user(
     return user
 
 
-@router.put("/me", response_model=schemas.User)
+@router.put("/me", response_model=schema.UserRead)
 def update_user_me(
     *,
-    db: Session = Depends(deps.get_db),
+    db: Session = Depends(dependencies.get_db),
     password: str = Body(None),
     full_name: str = Body(None),
     email: EmailStr = Body(None),
-    current_user: models.User = Depends(deps.get_current_active_user),
+    current_user: models.User = Depends(dependencies.get_current_active_user),
 ) -> Any:
     """
     Update own user.
     """
     current_user_data = jsonable_encoder(current_user)
-    user_in = schemas.UserUpdate(**current_user_data)
+    user_in = schema.UserUpdate(**current_user_data)
     if password is not None:
         user_in.password = password
     if full_name is not None:
@@ -104,10 +95,10 @@ def update_user_me(
     return user
 
 
-@router.get("/me", response_model=schemas.User)
+@router.get("/me", response_model=schema.UserRead)
 def get_current_user(
-    db: Session = Depends(deps.get_db),
-    current_user: models.User = Depends(deps.get_current_active_user),
+    db: Session = Depends(dependencies.get_db),
+    current_user: models.User = Depends(dependencies.get_current_active_user),
 ) -> Any:
     """
     Get current user.
@@ -115,14 +106,14 @@ def get_current_user(
     return current_user
 
 
-@router.post("/open", response_model=schemas.User)
+@router.post("/open", response_model=schema.UserRead)
 def create_user_open(
     *,
-    db: Session = Depends(deps.get_db),
+    db: Session = Depends(dependencies.get_db),
     password: str = Body(...),
     email: EmailStr = Body(...),
     full_name: str = Body(None),
-    role: Role = Body(...),
+    role: schema.Role = Body(...),
 ) -> Any:
     """
     Create new user without the need to be logged in.
@@ -138,21 +129,21 @@ def create_user_open(
             status_code=400,
             detail="The user with this username already exists in the system",
         )
-    user_in = schemas.UserCreate(
+    user_in = schema.UserCreate(
         password=password, email=email, full_name=full_name, role=role.value
     )
     user = crud.user.create(db, obj_in=user_in)
     return user
 
 
-@router.get("/{user_id}", response_model=schemas.User)
-def get_employee_by_id(
+@router.get("/{user_id}", response_model=schema.UserRead)
+def read_user_by_id(
     user_id: int,
-    current_user: models.User = Depends(deps.get_current_active_user),
-    db: Session = Depends(deps.get_db),
+    current_user: models.User = Depends(dependencies.get_current_active_user),
+    db: Session = Depends(dependencies.get_db),
 ) -> Any:
     """
-    Get a specific Employee by id.
+    Get a specific user by id.
     """
     user = crud.user.read(db, id=user_id)
     if user == current_user:
@@ -164,16 +155,16 @@ def get_employee_by_id(
     return user
 
 
-@router.put("/{user_id}", response_model=schemas.User)
-def update_employee(
+@router.put("/{user_id}", response_model=schema.UserRead)
+def update_user(
     *,
-    db: Session = Depends(deps.get_db),
+    db: Session = Depends(dependencies.get_db),
     user_id: int,
-    user_in: schemas.UserUpdate,
-    current_user: models.User = Depends(deps.get_current_active_superuser),
+    user_in: schema.UserUpdate,
+    current_user: models.User = Depends(dependencies.get_current_active_superuser),
 ) -> Any:
     """
-    Update Employee.
+    Update a user.
     """
     user = crud.user.read(db, id=user_id)
     if not user:

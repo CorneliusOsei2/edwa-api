@@ -18,8 +18,8 @@ class UserBase(BaseModel):
     is_active: bool | None = True
     is_superuser: bool = False
     full_name: str | None
+    username: str = ""
     role: str = Role.individualClient.value
-    superior: str | None = None
     start_date: datetime = datetime.today()
     end_date: datetime = datetime.today()
 
@@ -43,7 +43,7 @@ class UserInDBBase(UserBase):
 
 
 # Additional properties to return via API
-class User(UserInDBBase):
+class UserRead(UserInDBBase):
     pass
 
 

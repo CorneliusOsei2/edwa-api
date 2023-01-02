@@ -1,7 +1,17 @@
-from sqlalchemy import Boolean, Column, Integer, String, DateTime, Table, ForeignKey
+from sqlalchemy import (
+    Boolean,
+    Column,
+    Integer,
+    String,
+    DateTime,
+    Table,
+    ForeignKey,
+    Float,
+)
 from sqlalchemy.orm import relationship
 
 from app.database.base_class import Base
+
 
 clients_sales = Table(
     "clients_sales",
@@ -19,8 +29,7 @@ class Client(Base):  # type: ignore
     username = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
     is_active = Column(Boolean, default=True)
-    company_name = Column(String, nullable=False)
-    is_business = Column(Boolean, default=False)
     location = Column(String, nullable=False)
-    start_date = Column(DateTime, nullable=True)
+    start_date = Column(DateTime, nullable=False)
+    end_date = Column(DateTime, nullable=False)
     sales = relationship("Sale", secondary=clients_sales)
