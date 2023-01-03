@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from app.ents.client import crud, dependencies, models, schema
 import app.ents.user as user
 from app.core.config import settings
-from app.utils import send_new_account_email
+from app.utilities import utils
 
 router = APIRouter()
 
@@ -45,7 +45,7 @@ def create_client(
         )
     user = crud.client.create(db, obj_in=schema.ClientCreate(**user_in.dict()))
     if settings.EMAILS_ENABLED and user_in.email:
-        send_new_account_email(
+        utils.send_new_account_email(
             email_to=user_in.email, username=user_in.email, password=user_in.password
         )
     return user

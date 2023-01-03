@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from app.ents.employee import crud, dependencies, models, schema
 import app.ents.user as user
 from app.core.config import settings
-from app.utils import send_new_account_email
+from app.utilities import utils
 
 router = APIRouter()
 
@@ -48,7 +48,7 @@ def create_employee(
         db, obj_in=schema.EmployeeCreate(**employee_in.dict())
     )
     if settings.EMAILS_ENABLED and employee_in.email:
-        send_new_account_email(
+        utils.send_new_account_email(
             email_to=employee_in.email,
             username=employee_in.email,
             password=employee_in.password,

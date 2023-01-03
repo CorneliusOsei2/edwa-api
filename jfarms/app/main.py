@@ -1,9 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.prestart import prestart
 from app.core.config import settings
-
-# from app.api.api import api_router
 from app.database.init_db import init_db
 from app.database.session import SessionLocal
 
@@ -13,7 +12,7 @@ app = FastAPI(
     title=settings.PROJECT_NAME, openapi_url=f"{settings.API_STR}/openapi.json"
 )
 
-init_db(SessionLocal())
+prestart.main()
 
 # Set all CORS enabled origins
 if settings.BACKEND_CORS_ORIGINS:
