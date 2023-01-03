@@ -8,11 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.ents.client import dependencies, crud, models, schema
 from app.core import security, config
-from app.utils import (
-    generate_password_reset_token,
-    send_reset_password_email,
-    verify_password_reset_token,
-)
+from app.utilities import utils
 
 router = APIRouter()
 
@@ -65,8 +61,8 @@ def test_token(
 #             status_code=404,
 #             detail="The client with this username does not exist in the system.",
 #         )
-#     password_reset_token = generate_password_reset_token(email=email)
-#     send_reset_password_email(
+#     password_reset_token = utils.generate_password_reset_token(email=email)
+#     utils.send_reset_password_email(
 #         email_to=user.email, email=email, token=password_reset_token  # type: ignore  Column--warning
 #     )
 #     return {"schemas.Msg": "Password recovery email sent"}
@@ -81,7 +77,7 @@ def test_token(
 #     """
 #     Reset password
 #     """
-#     email = verify_password_reset_token(token)
+#     email = utils.verify_password_reset_token(token)
 #     if not email:
 #         raise HTTPException(status_code=400, detail="Invalid token")
 #     client = crud.client.read_by_email(db, email=email)

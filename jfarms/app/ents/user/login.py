@@ -9,11 +9,8 @@ from app.utilities import msg
 from app.ents.user import models, schema, crud, dependencies
 
 from app.core import security, config
-from app.utils import (
-    generate_password_reset_token,
-    send_reset_password_email,
-    verify_password_reset_token,
-)
+from app.utilities import utils
+
 
 router = APIRouter()
 
@@ -66,8 +63,8 @@ def recover_password(email: str, db: Session = Depends(dependencies.get_db)) -> 
             status_code=404,
             detail="The user with this username does not exist in the system.",
         )
-    password_reset_token = generate_password_reset_token(email=email)
-    send_reset_password_email(
+    password_reset_token = utils.generate_password_reset_token(email=email)
+    utils.send_reset_password_email(
         email_to=user.email, email=email, token=password_reset_token  # type: ignore  Column--warning
     )
     return {"schemas.Msg": "Password recovery email sent"}
@@ -82,7 +79,7 @@ def reset_password(
     """
     Reset password
     """
-    email = verify_password_reset_token(token)
+    email = utils.verify_password_reset_token(token)
     if not email:
         raise HTTPException(status_code=400, detail="Invalid token")
     user = crud.user.read_by_email(db, email=email)
