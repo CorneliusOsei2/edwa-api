@@ -1,9 +1,10 @@
 import logging
+
+from tenacity import retry
 from tenacity.after import after_log
 from tenacity.before import before_log
-from tenacity import retry
-from tenacity.wait import wait_fixed
 from tenacity.stop import stop_after_attempt
+from tenacity.wait import wait_fixed
 
 from app.database.session import SessionLocal
 

@@ -1,15 +1,8 @@
 import secrets
 from typing import Any, Optional, Union
 
-from pydantic import (
-    AnyHttpUrl,
-    BaseSettings,
-    EmailStr,
-    HttpUrl,
-    PostgresDsn,
-    validator,
-    parse_obj_as,
-)
+from pydantic import (AnyHttpUrl, BaseSettings, EmailStr, HttpUrl, PostgresDsn,
+                      parse_obj_as, validator)
 
 
 class Settings(BaseSettings):

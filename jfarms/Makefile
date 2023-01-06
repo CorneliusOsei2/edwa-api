@@ -5,6 +5,9 @@ api:
 clean:
 			find . | grep -E "(/__pycache__)" | xargs rm -rf
 
+fix-imports:
+			isort .
+			
 pyre:
 		watchman watch .
 		pyre

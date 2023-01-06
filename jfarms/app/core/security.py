@@ -3,10 +3,9 @@ from typing import Any
 
 from jose import jwt
 from passlib.context import CryptContext
+from pydantic import BaseModel
 
 from app.core.config import settings
-
-from pydantic import BaseModel
 
 
 class Token(BaseModel):

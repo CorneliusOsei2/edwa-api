@@ -1,10 +1,10 @@
 from typing import Any
-from typing_extensions import override
 
 from sqlalchemy.orm import Session
+from typing_extensions import override
 
-from app.core.security import get_password_hash, verify_password
 from app.base import crud_base
+from app.core.security import get_password_hash, verify_password
 from app.ents.client.models import Client
 from app.ents.client.schema import ClientCreate, ClientUpdate
 

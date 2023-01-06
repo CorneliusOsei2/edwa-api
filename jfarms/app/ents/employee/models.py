@@ -1,13 +1,5 @@
-from sqlalchemy import (
-    Boolean,
-    Column,
-    Integer,
-    String,
-    DateTime,
-    Table,
-    ForeignKey,
-    Float,
-)
+from sqlalchemy import (Boolean, Column, DateTime, Float, ForeignKey, Integer,
+                        String, Table)
 from sqlalchemy.orm import relationship
 
 from app.database.base_class import Base

@@ -3,10 +3,7 @@ from typing import Any
 from fastapi import APIRouter, Depends
 from pydantic.networks import EmailStr
 
-from app.ents.user import User
-
-from app.ents.user import dependencies
-
+from app.ents.user import User, dependencies
 # from app.core.celery_app import celery_app
 from app.utils import send_test_email
 

@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.ents import animal, employee, user, client
+from app.ents import animal, client, employee, user
 
 api_router = APIRouter()
 

@@ -1,21 +1,18 @@
 from datetime import timedelta
 from typing import Any
 
-from fastapi import APIRouter, Body, Depends, HTTPException, Form
+from fastapi import APIRouter, Body, Depends, Form, HTTPException
 from fastapi.encoders import jsonable_encoder
-from app.ents.user.login import login_access_token
-from app.ents.user.schema import UserLogin
-from app.ents.user.dependencies import get_db
-from app.core import security
-from app.core import config
 from pydantic.networks import EmailStr
 from sqlalchemy.orm import Session
 
-from app.ents.user import models, schema, crud, dependencies
-from app.ents.employee.schema import EmployeeCreate
-
-
+from app.core import config, security
 from app.core.config import settings
+from app.ents.employee.schema import EmployeeCreate
+from app.ents.user import crud, dependencies, models, schema
+from app.ents.user.dependencies import get_db
+from app.ents.user.login import login_access_token
+from app.ents.user.schema import UserLogin
 from app.utilities import utils
 
 router = APIRouter(prefix="/users")

@@ -8,10 +8,9 @@ from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
 import app.ents.user.crud as crud
-from app.ents.user import User
-
 from app.core import config, security
 from app.database.session import SessionLocal
+from app.ents.user import User
 from app.ents.user.schema import Role
 
 reusable_oauth2 = OAuth2PasswordBearer(

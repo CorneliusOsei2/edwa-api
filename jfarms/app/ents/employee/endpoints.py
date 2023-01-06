@@ -1,15 +1,15 @@
 from typing import Any
 
-from fastapi import APIRouter, Body, Depends, HTTPException, Form
+from fastapi import APIRouter, Body, Depends, Form, HTTPException
 from fastapi.encoders import jsonable_encoder
-from app.ents.employee.login import login_access_token
-from app.ents.user.dependencies import get_db
 from pydantic.networks import EmailStr
 from sqlalchemy.orm import Session
 
-from app.ents.employee import crud, dependencies, models, schema
 import app.ents.user as user
 from app.core.config import settings
+from app.ents.employee import crud, dependencies, models, schema
+from app.ents.employee.login import login_access_token
+from app.ents.user.dependencies import get_db
 from app.utilities import utils
 
 router = APIRouter(prefix="/employees")
