@@ -1,7 +1,13 @@
+from datetime import timedelta
 from typing import Any
 
-from fastapi import APIRouter, Body, Depends, HTTPException
+from fastapi import APIRouter, Body, Depends, HTTPException, Form
 from fastapi.encoders import jsonable_encoder
+from app.ents.user.login import login_access_token
+from app.ents.user.schema import UserLogin
+from app.ents.user.dependencies import get_db
+from app.core import security
+from app.core import config
 from pydantic.networks import EmailStr
 from sqlalchemy.orm import Session
 
@@ -12,31 +18,41 @@ from app.ents.employee.schema import EmployeeCreate
 from app.core.config import settings
 from app.utilities import utils
 
-router = APIRouter()
+router = APIRouter(prefix="/users")
 
 
-@router.get("/individual-clients", response_model=list[schema.UserRead])
-def get_individual_clients(
+@router.post("/login")
+def login_user(username=Form(), password=Form(), db: Session = Depends(get_db), token=Depends(login_access_token)) -> Any:
+    """
+    Retrieve Individual Clients.
+    """
+    return token
+
+
+@router.get("/individual", response_model=list[schema.UserRead])
+def get_users(
     db: Session = Depends(dependencies.get_db),
     skip: int = 0,
     limit: int = 100,
-    current_user: models.User = Depends(dependencies.get_current_active_superuser),
+    current_user: models.User = Depends(
+        dependencies.get_current_active_superuser),
 ) -> Any:
     """
     Retrieve Individual Clients.
     """
-    employees = crud.user.read_multi_with_role(
+    users = crud.user.read_multi_with_role(
         db, role=schema.Role.individualClient.value, skip=skip, limit=limit
     )
-    return employees
+    return users
 
 
-@router.get("/business-clients", response_model=list[schema.UserRead])
+@router.get("/business", response_model=list[schema.UserRead])
 def get_business_clients(
     db: Session = Depends(dependencies.get_db),
     skip: int = 0,
     limit: int = 100,
-    current_user: models.User = Depends(dependencies.get_current_active_superuser),
+    current_user: models.User = Depends(
+        dependencies.get_current_active_superuser),
 ) -> Any:
     """
     Retrieve Business Clients.
@@ -47,12 +63,13 @@ def get_business_clients(
     return business_clients
 
 
-@router.post("/client", response_model=schema.UserRead)
+@router.post("/", response_model=schema.UserRead)
 def create_user(
     *,
     db: Session = Depends(dependencies.get_db),
     user_in: schema.UserCreate,
-    current_user: models.User = Depends(dependencies.get_current_active_superuser),
+    current_user: models.User = Depends(
+        dependencies.get_current_active_superuser),
 ) -> Any:
     """
     Create a Client.
@@ -69,41 +86,6 @@ def create_user(
             email_to=user_in.email, username=user_in.email, password=user_in.password
         )
     return user
-
-
-@router.put("/me", response_model=schema.UserRead)
-def update_user_me(
-    *,
-    db: Session = Depends(dependencies.get_db),
-    password: str = Body(None),
-    full_name: str = Body(None),
-    email: EmailStr = Body(None),
-    current_user: models.User = Depends(dependencies.get_current_active_user),
-) -> Any:
-    """
-    Update own user.
-    """
-    current_user_data = jsonable_encoder(current_user)
-    user_in = schema.UserUpdate(**current_user_data)
-    if password is not None:
-        user_in.password = password
-    if full_name is not None:
-        user_in.full_name = full_name
-    if email is not None:
-        user_in.email = email
-    user = crud.user.update(db, db_obj=current_user, obj_in=user_in)
-    return user
-
-
-@router.get("/me", response_model=schema.UserRead)
-def get_current_user(
-    db: Session = Depends(dependencies.get_db),
-    current_user: models.User = Depends(dependencies.get_current_active_user),
-) -> Any:
-    """
-    Get current user.
-    """
-    return current_user
 
 
 @router.post("/open", response_model=schema.UserRead)
@@ -161,7 +143,8 @@ def update_user(
     db: Session = Depends(dependencies.get_db),
     user_id: int,
     user_in: schema.UserUpdate,
-    current_user: models.User = Depends(dependencies.get_current_active_superuser),
+    current_user: models.User = Depends(
+        dependencies.get_current_active_superuser),
 ) -> Any:
     """
     Update a user.

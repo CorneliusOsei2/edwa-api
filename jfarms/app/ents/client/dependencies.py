@@ -2,6 +2,7 @@ from typing import Generator
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
+from app.ents.user.dependencies import get_db
 from jose import jwt
 from jose.exceptions import JWTError
 from pydantic import ValidationError
@@ -17,19 +18,12 @@ reusable_oauth2 = OAuth2PasswordBearer(
 )
 
 
-def get_db() -> Generator:
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
 def get_current_client(
     db: Session = Depends(get_db), token: str = Depends(reusable_oauth2)
 ) -> models.Client:
     try:
-        payload = jwt.decode(token=token, key=settings.SECRET_KEY, algorithms=["HS256"])
+        payload = jwt.decode(
+            token=token, key=settings.SECRET_KEY, algorithms=["HS256"])
         token_data = TokenPayload(**payload)
     except (JWTError, ValidationError):
         raise HTTPException(

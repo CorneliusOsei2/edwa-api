@@ -30,7 +30,13 @@ class UserCreate(UserBase):
     password: str
 
 
+class UserLogin(BaseModel):
+    username: EmailStr
+    password: str
+
 # Properties to receive via API on update
+
+
 class UserUpdate(UserBase):
     password: str | None = None
 

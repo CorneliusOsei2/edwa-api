@@ -1,7 +1,9 @@
 from typing import Any
 
-from fastapi import APIRouter, Body, Depends, HTTPException
+from fastapi import APIRouter, Body, Depends, HTTPException, Form
 from fastapi.encoders import jsonable_encoder
+from app.ents.employee.login import login_access_token
+from app.ents.user.dependencies import get_db
 from pydantic.networks import EmailStr
 from sqlalchemy.orm import Session
 
@@ -10,15 +12,24 @@ import app.ents.user as user
 from app.core.config import settings
 from app.utilities import utils
 
-router = APIRouter()
+router = APIRouter(prefix="/employees")
 
 
-@router.get("/employees", response_model=list[schema.EmployeeRead])
+@router.post("/login")
+def login_employee(username=Form(), password=Form(), db: Session = Depends(get_db), token=Depends(login_access_token)) -> Any:
+    """
+    Log Employee in.
+    """
+    return token
+
+
+@router.get("", response_model=list[schema.EmployeeRead])
 def get_employees(
     db: Session = Depends(dependencies.get_db),
     skip: int = 0,
     limit: int = 100,
-    _: user.models.User = Depends(user.dependencies.get_current_active_superuser),
+    _: user.models.User = Depends(
+        user.dependencies.get_current_active_user),
 ) -> Any:
     """
     Retrieve Employees.
@@ -27,12 +38,13 @@ def get_employees(
     return employees
 
 
-@router.post("/employees", response_model=schema.EmployeeRead)
+@router.post("/", response_model=schema.EmployeeRead)
 def create_employee(
     *,
     db: Session = Depends(dependencies.get_db),
     employee_in: schema.EmployeeCreate,
-    _: user.models.User = Depends(user.dependencies.get_current_active_board_member),
+    _: user.models.User = Depends(
+        user.dependencies.get_current_active_board_member),
 ) -> Any:
     """
     Create an Employee.
@@ -56,7 +68,7 @@ def create_employee(
     return employee
 
 
-@router.put("/employees/{user_id}", response_model=schema.EmployeeRead)
+@router.put("/{user_id}", response_model=schema.EmployeeRead)
 def update_employee(
     *,
     db: Session = Depends(dependencies.get_db),

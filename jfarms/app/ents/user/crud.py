@@ -1,5 +1,4 @@
 from typing import Any
-from typing_extensions import override
 
 from sqlalchemy.orm import Session
 
@@ -24,7 +23,6 @@ class CRUDUser(crud_base.CRUDBase[models.User, schema.UserCreate, schema.UserUpd
             .all()
         )
 
-    @override
     def create(self, db: Session, *, obj_in: schema.UserCreate) -> models.User:
         db_obj = models.User(
             email=obj_in.email,
@@ -40,7 +38,6 @@ class CRUDUser(crud_base.CRUDBase[models.User, schema.UserCreate, schema.UserUpd
         db.refresh(db_obj)
         return db_obj
 
-    @override
     def update(
         self,
         db: Session,
@@ -64,7 +61,8 @@ class CRUDUser(crud_base.CRUDBase[models.User, schema.UserCreate, schema.UserUpd
         user = self.read_by_email(db, email=email)
         if not user:
             return None
-        if not verify_password(password, user.hashed_password):  # type: ignore  Column--warning
+        # type: ignore  Column--warning
+        if not verify_password(password, user.hashed_password):
             return None
         return user
 

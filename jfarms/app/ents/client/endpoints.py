@@ -1,7 +1,9 @@
 from typing import Any
 
-from fastapi import APIRouter, Body, Depends, HTTPException
+from fastapi import APIRouter, Body, Depends, HTTPException, Form
 from fastapi.encoders import jsonable_encoder
+from app.ents.client.login import login_access_token
+from app.ents.user.dependencies import get_db
 from pydantic.networks import EmailStr
 from sqlalchemy.orm import Session
 
@@ -13,12 +15,21 @@ from app.utilities import utils
 router = APIRouter()
 
 
+@router.post("/login")
+def login_client(username=Form(), password=Form(), db: Session = Depends(get_db), token=Depends(login_access_token)) -> Any:
+    """
+    Log Client in.
+    """
+    return token
+
+
 @router.get("/clients", response_model=list[schema.ClientRead])
 def get_clients(
     db: Session = Depends(dependencies.get_db),
     skip: int = 0,
     limit: int = 100,
-    _: user.models.User = Depends(user.dependencies.get_current_active_superuser),
+    _: user.models.User = Depends(
+        user.dependencies.get_current_active_superuser),
 ) -> Any:
     """
     Retrieve Clients.
@@ -32,7 +43,8 @@ def create_client(
     *,
     db: Session = Depends(dependencies.get_db),
     user_in: schema.ClientCreate,
-    _: user.models.User = Depends(user.dependencies.get_current_active_superuser),
+    _: user.models.User = Depends(
+        user.dependencies.get_current_active_superuser),
 ) -> Any:
     """
     Create an Client.
@@ -51,7 +63,7 @@ def create_client(
     return user
 
 
-@router.put("/{user_id}", response_model=schema.ClientRead)
+@router.put("/clients/{user_id}", response_model=schema.ClientRead)
 def update_client(
     *,
     db: Session = Depends(dependencies.get_db),

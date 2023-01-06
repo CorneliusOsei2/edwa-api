@@ -18,7 +18,6 @@ class CRUDClient(crud_base.CRUDBase[Client, ClientCreate, ClientUpdate]):
     ) -> list[Client]:
         return db.query(Client).offset(skip).limit(limit).all()
 
-    @override
     def create(self, db: Session, *, obj_in: ClientCreate) -> Client:
         db_obj = Client(
             email=obj_in.email,
@@ -35,7 +34,6 @@ class CRUDClient(crud_base.CRUDBase[Client, ClientCreate, ClientUpdate]):
         db.refresh(db_obj)
         return db_obj
 
-    @override
     def update(
         self, db: Session, *, db_obj: Client, obj_in: ClientUpdate | dict[str, Any]
     ) -> Client:
@@ -53,7 +51,8 @@ class CRUDClient(crud_base.CRUDBase[Client, ClientCreate, ClientUpdate]):
         client = self.read_by_email(db, email=email)
         if not client:
             return None
-        if not verify_password(password, client.hashed_password):  # type: ignore  Column--warning
+        # type: ignore  Column--warning
+        if not verify_password(password, client.hashed_password):
             return None
         return client
 

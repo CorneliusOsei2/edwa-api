@@ -8,7 +8,8 @@ from app.ents.employee import models, schema
 
 
 class CRUDEmployee(
-    crud_base.CRUDBase[models.Employee, schema.EmployeeCreate, schema.EmployeeUpdate]
+    crud_base.CRUDBase[models.Employee,
+                       schema.EmployeeCreate, schema.EmployeeUpdate]
 ):
     def read_by_email(self, db: Session, *, email: str) -> models.Employee | None:
         return db.query(models.Employee).filter(models.Employee.email == email).first()
@@ -23,7 +24,8 @@ class CRUDEmployee(
 
     def get_username(self, db: Session, obj_in: schema.EmployeeCreate) -> str:
         last_employee = (
-            db.query(models.Employee).order_by(models.Employee.id.desc()).first()
+            db.query(models.Employee).order_by(
+                models.Employee.id.desc()).first()
         )
         return f"{obj_in.first_name[0]}{obj_in.last_name[0]}{str(last_employee.id if last_employee else 1)}"
 
@@ -57,7 +59,8 @@ class CRUDEmployee(
         else:
             update_data = obj_in.dict(exclude_unset=True)
         if update_data["password"]:
-            hashed_password = security.get_password_hash(update_data["password"])
+            hashed_password = security.get_password_hash(
+                update_data["password"])
             del update_data["password"]
             update_data["hashed_password"] = hashed_password
         return super().update(db, db_obj=db_obj, obj_in=update_data)
@@ -68,15 +71,16 @@ class CRUDEmployee(
         employee = self.read_by_email(db, email=email)
         if not employee:
             return None
-        if not security.verify_password(password, employee.hashed_password):  # type: ignore  Column--warning
+
+        if not security.verify_password(password, employee.hashed_password):
             return None
         return employee
 
     def is_active(self, employee: models.Employee) -> bool:
-        return employee.is_active  # type: ignore  Column--warning
+        return bool(employee.is_active)
 
     def is_superemployee(self, user: models.Employee) -> bool:
-        return employee.is_superuser  # type: ignore  Column--warning
+        return employee.is_superuser
 
 
 employee = CRUDEmployee(models.Employee)

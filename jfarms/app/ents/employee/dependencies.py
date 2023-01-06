@@ -2,6 +2,7 @@ from typing import Generator
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
+from app.ents.user.dependencies import get_db
 from jose import jwt
 from jose.exceptions import JWTError
 from pydantic import ValidationError
@@ -14,14 +15,6 @@ from app.database.session import SessionLocal
 reusable_oauth2 = OAuth2PasswordBearer(
     tokenUrl=f"{config.settings.API_STR}/employees/login/access-token"
 )
-
-
-def get_db() -> Generator:
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 def get_current_employee(
