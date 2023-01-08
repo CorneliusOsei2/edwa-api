@@ -1,16 +1,15 @@
 from typing import Generator
 
+from app.core import config, security
+from app.database.session import SessionLocal
+from app.ents.employee import crud, models, schema
+from app.ents.user.dependencies import get_db
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
 from jose.exceptions import JWTError
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
-
-from app.core import config, security
-from app.database.session import SessionLocal
-from app.ents.employee import crud, models, schema
-from app.ents.user.dependencies import get_db
 
 reusable_oauth2 = OAuth2PasswordBearer(
     tokenUrl=f"{config.settings.API_STR}/employees/login/access-token"

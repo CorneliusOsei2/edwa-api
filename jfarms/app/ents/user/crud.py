@@ -1,10 +1,9 @@
 from typing import Any
 
-from sqlalchemy.orm import Session
-
 from app.base import crud_base
 from app.core.security import get_password_hash, verify_password
 from app.ents.user import crud, models, schema
+from sqlalchemy.orm import Session
 
 
 class CRUDUser(crud_base.CRUDBase[models.User, schema.UserCreate, schema.UserUpdate]):

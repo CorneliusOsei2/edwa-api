@@ -1,6 +1,5 @@
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
-
 from app.database.base_class import Base
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
 
 
 class Health(Base):  # type: ignore

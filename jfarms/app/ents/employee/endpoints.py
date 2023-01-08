@@ -1,16 +1,15 @@
 from typing import Any
 
-from fastapi import APIRouter, Body, Depends, Form, HTTPException
-from fastapi.encoders import jsonable_encoder
-from pydantic.networks import EmailStr
-from sqlalchemy.orm import Session
-
-import app.ents.user as user
 from app.core.config import settings
+from app.ents import user
 from app.ents.employee import crud, dependencies, models, schema
 from app.ents.employee.login import login_access_token
 from app.ents.user.dependencies import get_db
 from app.utilities import utils
+from fastapi import APIRouter, Body, Depends, Form, HTTPException
+from fastapi.encoders import jsonable_encoder
+from pydantic.networks import EmailStr
+from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/employees")
 
@@ -74,7 +73,8 @@ def update_employee(
     db: Session = Depends(dependencies.get_db),
     user_id: int,
     user_in: schema.EmployeeUpdate,
-    _: user.User = Depends(user.dependencies.get_current_active_board_member),
+    _: user.models.User = Depends(
+        user.dependencies.get_current_active_board_member),
 ) -> Any:
     """
     Update Employee.

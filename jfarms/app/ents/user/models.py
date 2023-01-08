@@ -1,7 +1,6 @@
+from app.database.base_class import Base
 from sqlalchemy import Boolean, Column, DateTime, Integer, String
 from sqlalchemy.orm import relationship
-
-from app.database.base_class import Base
 
 
 class User(Base):  # type: ignore

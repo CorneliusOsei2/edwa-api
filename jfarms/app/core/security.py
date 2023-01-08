@@ -1,11 +1,10 @@
 from datetime import datetime, timedelta
 from typing import Any
 
+from app.core.config import settings
 from jose import jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
-
-from app.core.config import settings
 
 
 class Token(BaseModel):
