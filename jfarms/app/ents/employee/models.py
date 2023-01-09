@@ -32,6 +32,7 @@ employees_sales = Table(
 class Employee(Base):  # type: ignore
     __tablename__ = "employees"
     id = Column(Integer, primary_key=True, index=True)
+    image = Column(String)
     first_name = Column(String, index=True, nullable=False)
     middle_name = Column(String, index=True, nullable=True)
     last_name = Column(String, index=True, nullable=False)

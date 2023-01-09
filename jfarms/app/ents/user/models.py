@@ -5,8 +5,8 @@ from sqlalchemy.orm import relationship
 
 class User(Base):  # type: ignore
     __tablename__ = "users"
-    __table_args__ = {"extend_existing": True}
     id = Column(Integer, primary_key=True, index=True)
+    image = Column(String)
     full_name = Column(String, index=True, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
