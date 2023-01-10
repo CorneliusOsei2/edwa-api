@@ -1,5 +1,4 @@
 from app.core.config import settings
-from app.database.init_db import init_db
 from app.ents.api import api_router
 from app.prestart import initial_data
 from fastapi import FastAPI

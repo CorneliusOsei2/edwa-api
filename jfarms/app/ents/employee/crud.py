@@ -21,7 +21,7 @@ class CRUDEmployee(
     def get_full_name(self, obj_in: schema.EmployeeCreate) -> str:
         return f"{obj_in.first_name} {obj_in.middle_name} {obj_in.last_name}"
 
-    def get_username(self, db: Session, obj_in: schema.EmployeeCreate) -> str:
+    def _get_username(self, db: Session, obj_in: schema.EmployeeCreate) -> str:
         last_employee = (
             db.query(models.Employee).order_by(
                 models.Employee.id.desc()).first()
@@ -35,7 +35,7 @@ class CRUDEmployee(
             exclude={"password"},
             include={
                 "full_name": self.get_full_name(obj_in),
-                "username": self.get_username(db, obj_in),
+                "username": self._get_username(db, obj_in),
                 "hashed_password": hashed_password,
             },
         )

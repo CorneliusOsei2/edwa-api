@@ -13,6 +13,7 @@ class Token(BaseModel):
 
 
 class TokenPayload(BaseModel):
+
     sub: str | None = None
 
 
@@ -22,6 +23,16 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 def create_access_token(
     subject: str | Any, expires_delta: timedelta | None = None
 ) -> str:
+    """Creates an access token
+
+    Args:
+        subject (str | Any): Token payload, typically the entity id.
+        expires_delta (timedelta | None, optional): Lifetime of token in minutes. Defaults to None.
+
+    Returns:
+        str: Encoded token string
+    """
+
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
@@ -36,6 +47,15 @@ def create_access_token(
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Checks if `plain_password` is `hashed_password`.
+    
+    Args:
+        plain_password (str): User input password.
+        hashed_password (str): Hashed password with passlib
+
+    Returns:
+        bool: If the two passwords are same.
+    """
     return pwd_context.verify(plain_password, hashed_password)
 
 
