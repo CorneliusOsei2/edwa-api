@@ -1,7 +1,7 @@
 from typing import Any
 
 from app.base import crud_base
-from app.core.security import get_password_hash, verify_password
+from app.core.security import security
 from app.ents.user import crud, models, schema
 from sqlalchemy.orm import Session
 
@@ -24,7 +24,7 @@ class CRUDUser(crud_base.CRUDBase[models.User, schema.UserCreate, schema.UserUpd
     def create(self, db: Session, *, obj_in: schema.UserCreate) -> models.User:
         db_obj = models.User(
             email=obj_in.email,
-            hashed_password=get_password_hash(obj_in.password),
+            hashed_password=security.get_password_hash(obj_in.password),
             full_name=obj_in.full_name,
             role=obj_in.role,
             is_superuser=obj_in.is_superuser,
@@ -48,7 +48,8 @@ class CRUDUser(crud_base.CRUDBase[models.User, schema.UserCreate, schema.UserUpd
         else:
             update_data = obj_in.dict(exclude_unset=True)
         if update_data["password"]:
-            hashed_password = get_password_hash(update_data["password"])
+            hashed_password = security.get_password_hash(
+                update_data["password"])
             del update_data["password"]
             update_data["hashed_password"] = hashed_password
         return super().update(db, db_obj=db_obj, obj_in=update_data)
@@ -60,7 +61,7 @@ class CRUDUser(crud_base.CRUDBase[models.User, schema.UserCreate, schema.UserUpd
         if not user:
             return None
         # type: ignore  Column--warning
-        if not verify_password(password, user.hashed_password):
+        if not security.verify_password(password, user.hashed_password):
             return None
         return user
 

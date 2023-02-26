@@ -1,7 +1,7 @@
 from typing import Any
 
 from app.base import crud_base
-from app.core import security
+from app.core.security import security
 from app.ents.employee import models, schema
 from sqlalchemy.orm import Session
 
@@ -18,45 +18,39 @@ class CRUDEmployee(
     ) -> list[models.Employee]:
         return db.query(models.Employee).offset(skip).limit(limit).all()
 
-    def get_full_name(self, obj_in: schema.EmployeeCreate) -> str:
-        return f"{obj_in.first_name} {obj_in.middle_name} {obj_in.last_name}"
+    def get_full_name(self, employee_in: schema.EmployeeCreate) -> str:
+        return f"{employee_in.first_name} {employee_in.middle_name} {employee_in.last_name}"
 
-    def _get_username(self, db: Session, obj_in: schema.EmployeeCreate) -> str:
+    def _get_username(self, db: Session, employee_in: schema.EmployeeCreate) -> str:
         last_employee = (
             db.query(models.Employee).order_by(
                 models.Employee.id.desc()).first()
         )
-        return f"{obj_in.first_name[0]}{obj_in.last_name[0]}{str(last_employee.id if last_employee else 1)}"
+        return f"{employee_in.first_name[0]}{employee_in.last_name[0]}{str(last_employee.id if last_employee else 1)}"
 
-    def create(self, db: Session, *, obj_in: schema.EmployeeCreate) -> models.Employee:
-        hashed_password = security.get_password_hash(obj_in.password)
+    def create(self, db: Session, *, employee_in: schema.EmployeeCreate) -> models.Employee:
+        employee_in.password = security.get_password_hash(employee_in.password)
+        employee = models.Employee(
+            **(employee_in.dict()),
+            full_name=self.get_full_name(employee_in),
+            username=self._get_username(db, employee_in))
 
-        obj = obj_in.dict(
-            exclude={"password"},
-            include={
-                "full_name": self.get_full_name(obj_in),
-                "username": self._get_username(db, obj_in),
-                "hashed_password": hashed_password,
-            },
-        )
-
-        db_obj = models.Employee(**obj)
-        db.add(db_obj)
+        db.add(employee)
         db.commit()
-        db.refresh(db_obj)
-        return db_obj
+        db.refresh(employee)
+        return employee
 
     def update(
         self,
         db: Session,
         *,
         db_obj: models.Employee,
-        obj_in: schema.EmployeeUpdate | dict[str, Any],
+        employee_in: schema.EmployeeUpdate | dict[str, Any],
     ) -> models.Employee:
-        if isinstance(obj_in, dict):
-            update_data = obj_in
+        if isinstance(employee_in, dict):
+            update_data = employee_in
         else:
-            update_data = obj_in.dict(exclude_unset=True)
+            update_data = employee_in.dict(exclude_unset=True)
         if update_data["password"]:
             hashed_password = security.get_password_hash(
                 update_data["password"])

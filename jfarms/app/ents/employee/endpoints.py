@@ -27,8 +27,6 @@ def get_employees(
     db: Session = Depends(dependencies.get_db),
     skip: int = 0,
     limit: int = 100,
-    _: user.models.User = Depends(
-        user.dependencies.get_current_active_user),
 ) -> Any:
     """
     Retrieve Employees.
@@ -41,9 +39,7 @@ def get_employees(
 def create_employee(
     *,
     db: Session = Depends(dependencies.get_db),
-    employee_in: schema.EmployeeCreate,
-    _: user.models.User = Depends(
-        user.dependencies.get_current_active_board_member),
+    employee_in: schema.EmployeeCreate
 ) -> Any:
     """
     Create an Employee.
@@ -52,18 +48,12 @@ def create_employee(
     if employee:
         raise HTTPException(
             status_code=400,
-            detail="The employee with this username already exists in the system.",
+            detail="The employee with this email already exists!.",
         )
 
     employee = crud.employee.create(
-        db, obj_in=schema.EmployeeCreate(**employee_in.dict())
+        db, employee_in=schema.EmployeeCreate(**employee_in.dict())
     )
-    if settings.EMAILS_ENABLED and employee_in.email:
-        utils.send_new_account_email(
-            email_to=employee_in.email,
-            username=employee_in.email,
-            password=employee_in.password,
-        )
     return employee
 
 

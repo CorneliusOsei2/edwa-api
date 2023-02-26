@@ -4,7 +4,7 @@ from sqlalchemy import (Boolean, Column, DateTime, Float, ForeignKey, Integer,
 from sqlalchemy.orm import relationship
 
 
-class EmployeeID(Base):  # type: ignore
+class EmployeeID(Base):
     __tablename__ = "employee_ids"
     id = Column(Integer, primary_key=True, index=True)
     employee_id = Column(Integer, ForeignKey("employees.id"), nullable=True)
@@ -12,7 +12,7 @@ class EmployeeID(Base):  # type: ignore
     tag = Column(String, nullable=False)
 
 
-class Sale(Base):  # type: ignore
+class Sale(Base):
     __tablename__ = "sales"
     id = Column(Integer, primary_key=True, index=True)
     date = Column(DateTime, nullable=False)
@@ -29,19 +29,19 @@ employees_sales = Table(
 )
 
 
-class Employee(Base):  # type: ignore
+class Employee(Base):
     __tablename__ = "employees"
     id = Column(Integer, primary_key=True, index=True)
-    image = Column(String)
+    image = Column(String, nullable=True)
     first_name = Column(String, index=True, nullable=False)
     middle_name = Column(String, index=True, nullable=True)
     last_name = Column(String, index=True, nullable=False)
     full_name = Column(String, index=True, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
     username = Column(String, unique=True, index=True, nullable=False)
-    contact = Column(String, unique=True, nullable=False)
-    home_address = Column(String, unique=True, nullable=False)
-    hashed_password = Column(String, nullable=False)
+    contact = Column(String, unique=False, nullable=False)
+    home_address = Column(String, nullable=False)
+    password = Column(String, nullable=False)
     is_active = Column(Boolean, default=True)
     job_title = Column(String, nullable=False)
     department = Column(String, nullable=False)
