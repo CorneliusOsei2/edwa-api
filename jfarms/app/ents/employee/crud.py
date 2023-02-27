@@ -65,7 +65,7 @@ class CRUDEmployee(
         if not employee:
             return None
 
-        if not security.verify_password(password, employee.hashed_password):
+        if not security.verify_password(password, employee.password):
             return None
         return employee
 

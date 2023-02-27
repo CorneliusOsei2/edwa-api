@@ -10,6 +10,7 @@ from fastapi import APIRouter, Body, Depends, Form, HTTPException
 from fastapi.encoders import jsonable_encoder
 from pydantic.networks import EmailStr
 from sqlalchemy.orm import Session
+from fastapi_jwt_auth import AuthJWT
 
 router = APIRouter(prefix="/employees")
 
@@ -27,10 +28,13 @@ def get_employees(
     db: Session = Depends(dependencies.get_db),
     skip: int = 0,
     limit: int = 100,
+    Authorize: AuthJWT = Depends()
 ) -> Any:
     """
     Retrieve Employees.
     """
+    Authorize.jwt_required()
+    # current_user = Authorize.get_jwt_subject()
     employees = crud.employee.read_multi(db, skip=skip, limit=limit)
     return employees
 

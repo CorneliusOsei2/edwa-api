@@ -1,5 +1,5 @@
 from typing import Any, Optional, Union
-
+from fastapi_jwt_auth import AuthJWT
 from pydantic import (AnyHttpUrl, BaseSettings, EmailStr, HttpUrl, PostgresDsn,
                       parse_obj_as, validator)
 
@@ -7,6 +7,7 @@ from pydantic import (AnyHttpUrl, BaseSettings, EmailStr, HttpUrl, PostgresDsn,
 class Settings(BaseSettings):
     API_STR: str = "/jfarms"
     SECRET_KEY: str
+    AUTHJWT_SECRET_KEY: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8  # 8 days
     SERVER_NAME: str = "localhost"
     SERVER_HOST: AnyHttpUrl = parse_obj_as(AnyHttpUrl, "http://127.0.0.1:8000")
@@ -45,7 +46,7 @@ class Settings(BaseSettings):
             scheme="postgresql",
             user=values.get("POSTGRES_USER"),
             password=values.get("POSTGRES_PASSWORD"),
-            host=values.get("POSTGRES_HOST"),  
+            host=values.get("POSTGRES_HOST"),
             path=f"/{values.get('POSTGRES_DB') or ''}",
         )
 
@@ -59,4 +60,4 @@ class Settings(BaseSettings):
         case_sensitive = True
 
 
-settings = Settings()  # type: ignore
+settings = Settings()
