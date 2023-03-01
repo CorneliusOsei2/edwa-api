@@ -1,7 +1,16 @@
-from app.database.base_class import Base
-from sqlalchemy import (Boolean, Column, DateTime, Float, ForeignKey, Integer,
-                        String, Table)
+from sqlalchemy import (
+    Boolean,
+    Column,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    Table,
+)
 from sqlalchemy.orm import relationship
+
+from app.database.base_class import Base
 
 
 class EmployeeID(Base):

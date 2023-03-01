@@ -1,11 +1,12 @@
 from typing import Any
 
+from sqlalchemy.orm import Session
+from typing_extensions import override
+
 from app.base import crud_base
 from app.core.security import security
 from app.ents.client.models import Client
 from app.ents.client.schema import ClientCreate, ClientUpdate
-from sqlalchemy.orm import Session
-from typing_extensions import override
 
 
 class CRUDClient(crud_base.CRUDBase[Client, ClientCreate, ClientUpdate]):

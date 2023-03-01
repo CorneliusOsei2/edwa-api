@@ -57,3 +57,4 @@ websockets==10.4
 sphinx
 psycopg2-binary
 fastapi-jwt-auth
+isort

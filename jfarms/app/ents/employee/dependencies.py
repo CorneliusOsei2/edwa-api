@@ -1,12 +1,13 @@
-from app.core import config, security
-from app.ents.employee import crud, models
-from app.ents.user.dependencies import get_db
-from fastapi import Depends, HTTPException, Header, status
+from fastapi import Depends, Header, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
 from jose.exceptions import JWTError
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
+
+from app.core import config, security
+from app.ents.employee import crud, models
+from app.ents.user.dependencies import get_db
 
 reusable_oauth2 = OAuth2PasswordBearer(
     tokenUrl=f"{config.settings.API_STR}/employees/login/access-token"
@@ -14,11 +15,11 @@ reusable_oauth2 = OAuth2PasswordBearer(
 
 
 def get_current_employee(
-    db: Session = Depends(get_db), authorization: str = Header()
+    db: Session = Depends(get_db), auth_token: str = Depends(reusable_oauth2)
 ) -> models.Employee:
     try:
         payload = jwt.decode(
-            token=authorization, key=config.settings.SECRET_KEY, algorithms=[
+            token=auth_token, key=config.settings.SECRET_KEY, algorithms=[
                 "HS256"]
         )
         token_data = security.TokenPayload(**payload)

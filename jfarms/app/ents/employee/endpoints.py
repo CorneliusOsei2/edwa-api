@@ -1,11 +1,12 @@
 from typing import Any
 
-from app.ents.employee import crud, dependencies, schema, auth, models
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response
 from sqlalchemy.orm import Session
-from app.ents.user.dependencies import get_current_user
+
 from app.ents import user
+from app.ents.employee import auth, crud, dependencies, models, schema
+from app.ents.user.dependencies import get_current_user
 
 router = APIRouter(prefix="/employees")
 

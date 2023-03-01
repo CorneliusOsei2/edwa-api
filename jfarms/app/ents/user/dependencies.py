@@ -1,16 +1,17 @@
 from typing import Generator
 
-import app.ents.user.crud as crud
-from app.core import config, security
-from app.database.session import SessionLocal
-from app.ents.user import models
-from app.ents.user.schema import Role
-from fastapi import Depends, HTTPException, Header, status
+from fastapi import Depends, Header, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
 from jose.exceptions import JWTError
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
+
+import app.ents.user.crud as crud
+from app.core import config, security
+from app.database.session import SessionLocal
+from app.ents.user import models
+from app.ents.user.schema import Role
 
 reusable_oauth2 = OAuth2PasswordBearer(
     tokenUrl=f"{config.settings.API_STR}/login/access-token"
@@ -26,11 +27,12 @@ def get_db() -> Generator:
 
 
 def get_current_user(
-    db: Session = Depends(get_db), authorization: str = Header()
+    db: Session = Depends(get_db), authorization: str = Depends(reusable_oauth2)
 ) -> models.User:
     try:
         payload = jwt.decode(
-            token=authorization, key=config.settings.SECRET_KEY, algorithms=["HS256"]
+            token=authorization, key=config.settings.SECRET_KEY, algorithms=[
+                "HS256"]
         )
         token_data = security.TokenPayload(**payload)
     except (JWTError, ValidationError):

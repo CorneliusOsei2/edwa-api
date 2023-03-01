@@ -1,6 +1,11 @@
 from datetime import timedelta
 from typing import Any
 
+from fastapi import APIRouter, Body, Depends, Form, HTTPException
+from fastapi.encoders import jsonable_encoder
+from pydantic.networks import EmailStr
+from sqlalchemy.orm import Session
+
 from app.core import config, security
 from app.core.config import settings
 from app.ents.employee.schema import EmployeeCreate
@@ -9,10 +14,6 @@ from app.ents.user.dependencies import get_db
 from app.ents.user.login import login_access_token
 from app.ents.user.schema import UserLogin
 from app.utilities import utils
-from fastapi import APIRouter, Body, Depends, Form, HTTPException
-from fastapi.encoders import jsonable_encoder
-from pydantic.networks import EmailStr
-from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/users")
 
