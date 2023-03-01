@@ -1,7 +1,6 @@
 from typing import Any
 
-from app.ents.employee import crud, dependencies, schema
-from app.ents.employee.login import login_access_token
+from app.ents.employee import crud, dependencies, schema, auth, models
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response
 from sqlalchemy.orm import Session
@@ -12,7 +11,7 @@ router = APIRouter(prefix="/employees")
 
 
 @router.post("/login")
-def login_employee(response: Response,   token=Depends(login_access_token)) -> Any:
+def login_employee(response: Response,   token=Depends(auth.login_access_token)) -> Any:
     """
     Log Employee in.
     """
@@ -51,9 +50,7 @@ def create_employee(
             detail="The employee with this email already exists!.",
         )
 
-    employee = crud.employee.create(
-        db, employee_in=schema.EmployeeCreate(**employee_in.dict())
-    )
+    employee = crud.employee.create(db, employee_in=employee_in)
     return employee
 
 
@@ -61,19 +58,18 @@ def create_employee(
 def update_employee(
     *,
     db: Session = Depends(dependencies.get_db),
-    user_id: int,
-    user_in: schema.EmployeeUpdate,
-    _: user.models.User = Depends(
-        user.dependencies.get_current_active_board_member),
+    employee_in: schema.EmployeeUpdate,
+    employee: models.Employee = Depends(dependencies.get_current_employee),
 ) -> Any:
     """
     Update Employee.
     """
-    user = crud.employee.read(db, id=user_id)
-    if not user:
+    employee = crud.employee.read(db, id=employee.id)
+    if not employee:
         raise HTTPException(
             status_code=404,
-            detail="The user with this username does not exist in the system",
+            detail="The employee with this employee name does not exist in the system",
         )
-    user = crud.employee.update(db, db_obj=user, obj_in=user_in)
+    employee = crud.employee.update(
+        db, db_obj=employee, employee_in=employee_in)
     return user
