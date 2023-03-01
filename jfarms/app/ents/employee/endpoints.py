@@ -1,25 +1,22 @@
 from typing import Any
 
-from app.core.config import settings
-from app.ents import user
-from app.ents.employee import crud, dependencies, models, schema
+from app.ents.employee import crud, dependencies, schema
 from app.ents.employee.login import login_access_token
-from app.ents.user.dependencies import get_db
-from app.utilities import utils
-from fastapi import APIRouter, Body, Depends, Form, HTTPException
-from fastapi.encoders import jsonable_encoder
-from pydantic.networks import EmailStr
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import Response
 from sqlalchemy.orm import Session
-from fastapi_jwt_auth import AuthJWT
+from app.ents.user.dependencies import get_current_user
+from app.ents import user
 
 router = APIRouter(prefix="/employees")
 
 
 @router.post("/login")
-def login_employee(username=Form(), password=Form(), db: Session = Depends(get_db), token=Depends(login_access_token)) -> Any:
+def login_employee(response: Response,   token=Depends(login_access_token)) -> Any:
     """
     Log Employee in.
     """
+    response.headers["Authorization"] = f'{token.get("type")} {token.get("access_token")}'
     return token
 
 
@@ -28,13 +25,11 @@ def get_employees(
     db: Session = Depends(dependencies.get_db),
     skip: int = 0,
     limit: int = 100,
-    Authorize: AuthJWT = Depends()
+    _: str = Depends(dependencies.get_current_employee),
 ) -> Any:
     """
     Retrieve Employees.
     """
-    Authorize.jwt_required()
-    # current_user = Authorize.get_jwt_subject()
     employees = crud.employee.read_multi(db, skip=skip, limit=limit)
     return employees
 
@@ -43,7 +38,8 @@ def get_employees(
 def create_employee(
     *,
     db: Session = Depends(dependencies.get_db),
-    employee_in: schema.EmployeeCreate
+    employee_in: schema.EmployeeCreate,
+    _=Depends(get_current_user)
 ) -> Any:
     """
     Create an Employee.

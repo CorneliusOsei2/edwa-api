@@ -5,7 +5,7 @@ from app.core import config, security
 from app.database.session import SessionLocal
 from app.ents.user import models
 from app.ents.user.schema import Role
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Header, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
 from jose.exceptions import JWTError
@@ -26,11 +26,11 @@ def get_db() -> Generator:
 
 
 def get_current_user(
-    db: Session = Depends(get_db), _token: str = Depends(reusable_oauth2)
+    db: Session = Depends(get_db), authorization: str = Header()
 ) -> models.User:
     try:
         payload = jwt.decode(
-            token=_token, key=config.settings.SECRET_KEY, algorithms=["HS256"]
+            token=authorization, key=config.settings.SECRET_KEY, algorithms=["HS256"]
         )
         token_data = security.TokenPayload(**payload)
     except (JWTError, ValidationError):

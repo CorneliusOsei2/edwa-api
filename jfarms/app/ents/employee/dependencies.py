@@ -1,7 +1,7 @@
 from app.core import config, security
 from app.ents.employee import crud, models
 from app.ents.user.dependencies import get_db
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Header, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
 from jose.exceptions import JWTError
@@ -14,11 +14,12 @@ reusable_oauth2 = OAuth2PasswordBearer(
 
 
 def get_current_employee(
-    db: Session = Depends(get_db), token: str = Depends(reusable_oauth2)
+    db: Session = Depends(get_db), authorization: str = Header()
 ) -> models.Employee:
     try:
         payload = jwt.decode(
-            token=token, key=config.settings.SECRET_KEY, algorithms=["HS256"]
+            token=authorization, key=config.settings.SECRET_KEY, algorithms=[
+                "HS256"]
         )
         token_data = security.TokenPayload(**payload)
     except (JWTError, ValidationError):

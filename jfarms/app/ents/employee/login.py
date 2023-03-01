@@ -1,21 +1,20 @@
 from datetime import timedelta
 from typing import Any
 
-from app.core import security
+from app.core.security import security, Token
+from app.core.config import settings
 from app.ents.employee import crud, dependencies, models, schema
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from fastapi_jwt_auth import AuthJWT
 
 router = APIRouter()
 
 
-@router.post("/employees/login/access-token", response_model=security.Token)
+@router.post("/employees/login/access-token", response_model=Token)
 def login_access_token(
     db: Session = Depends(dependencies.get_db),
     form_data: OAuth2PasswordRequestForm = Depends(),
-    Authorize: AuthJWT = Depends()
 ) -> Any:
     """
     OAuth2 compatible token login, get an access token for future requests
@@ -28,30 +27,15 @@ def login_access_token(
             status_code=400, detail="Incorrect email or password")
     elif not crud.employee.is_active(employee):
         raise HTTPException(status_code=400, detail="Inactive user")
-
     access_token_expires = timedelta(
-        minutes=security.settings.ACCESS_TOKEN_EXPIRE_MINUTES
+        minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
     )
     return {
-        "access_token": Authorize.create_access_token(subject=employee.id, fresh=True),
-        "refresh_token": Authorize.create_refresh_token(subject=employee.id),
-        "token_type": "bearer",
+        "access_token": security.create_access_token(
+            employee.id, expires_delta=access_token_expires
+        ),
+        "type": "bearer",
     }
-
-
-@router.post("/employees/login/refresh-token", response_model=schema.EmployeeRead)
-def refresh_token(
-    Authorize: AuthJWT = Depends()
-) -> Any:
-    """
-    Refresh access token
-    """
-    Authorize.jwt_refresh_token_required()
-
-    employee_id = Authorize.get_jwt_subject()
-    new_access_token = Authorize.create_access_token(
-        subject=employee_id, fresh=False)
-    return {"access_token": new_access_token}
 
 
 @router.post("/employees/login/test-token", response_model=schema.EmployeeRead)
@@ -93,7 +77,7 @@ def test_token(
 #     """
 #     Reset password
 #     """
-#     email =utils.verify_password_reset_token(token)
+#     email = utils.verify_password_reset_token(token)
 #     if not email:
 #         raise HTTPException(status_code=400, detail="Invalid token")
 #     employee = crud.employee.read_by_email(db, email=email)

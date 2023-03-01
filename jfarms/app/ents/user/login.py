@@ -1,7 +1,9 @@
 from datetime import timedelta
 from typing import Any
 
-from app.core import config, security
+from app.core.security import security, Token
+from app.core import config
+
 from app.ents.user import crud, dependencies, models, schema
 from app.utilities import msg, utils
 from fastapi import APIRouter, Body, Depends, HTTPException
@@ -11,7 +13,7 @@ from sqlalchemy.orm import Session
 router = APIRouter()
 
 
-@router.post("/login/access-token", response_model=security.Token)
+@router.post("/login/access-token", response_model=Token)
 def login_access_token(
     db: Session = Depends(dependencies.get_db),
     form_data: OAuth2PasswordRequestForm = Depends(),
@@ -23,7 +25,8 @@ def login_access_token(
         db, email=form_data.username, password=form_data.password
     )
     if not user:
-        raise HTTPException(status_code=400, detail="Incorrect email or password")
+        raise HTTPException(
+            status_code=400, detail="Incorrect email or password")
     elif not crud.user.is_active(user):
         raise HTTPException(status_code=400, detail="Inactive user")
     access_token_expires = timedelta(
@@ -33,7 +36,7 @@ def login_access_token(
         "access_token": security.create_access_token(
             user.id, expires_delta=access_token_expires
         ),
-        "token_type": "bearer",
+        "token_type": "Bearer",
     }
 
 
@@ -61,7 +64,8 @@ def recover_password(email: str, db: Session = Depends(dependencies.get_db)) -> 
         )
     password_reset_token = utils.generate_password_reset_token(email=email)
     utils.send_reset_password_email(
-        email_to=user.email, email=email, token=password_reset_token  # type: ignore  Column--warning
+        # type: ignore  Column--warning
+        email_to=user.email, email=email, token=password_reset_token
     )
     return {"schemas.Msg": "Password recovery email sent"}
 
