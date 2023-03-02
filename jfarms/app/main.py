@@ -1,7 +1,6 @@
 from fastapi import FastAPI, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
-
 from app.core.config import settings
 from app.ents.api import api_router
 from app.prestart import initial_data

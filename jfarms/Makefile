@@ -1,3 +1,7 @@
+install:
+	pip install poetry
+	poetry shell
+	poetry install
 
 api:
 	./prestart.sh

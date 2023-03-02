@@ -12,11 +12,13 @@ router = APIRouter(prefix="/employees")
 
 
 @router.post("/login")
-def login_employee(response: Response,   token=Depends(auth.login_access_token)) -> Any:
+def login_employee(response: Response, token=Depends(auth.login_access_token)) -> Any:
     """
     Log Employee in.
     """
-    response.headers["Authorization"] = f'{token.get("type")} {token.get("access_token")}'
+    response.headers[
+        "Authorization"
+    ] = f'{token.get("type")} {token.get("access_token")}'
     return token
 
 
@@ -39,7 +41,7 @@ def create_employee(
     *,
     db: Session = Depends(dependencies.get_db),
     employee_in: schema.EmployeeCreate,
-    _=Depends(get_current_user)
+    _=Depends(get_current_user),
 ) -> Any:
     """
     Create an Employee.
@@ -71,6 +73,5 @@ def update_employee(
             status_code=404,
             detail="The employee with this employee name does not exist in the system",
         )
-    employee = crud.employee.update(
-        db, db_obj=employee, employee_in=employee_in)
+    employee = crud.employee.update(db, db_obj=employee, employee_in=employee_in)
     return user
