@@ -1,4 +1,4 @@
-from fastapi import Depends, Header, HTTPException, status
+from fastapi import Cookie, Depends, Header, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
 from jose.exceptions import JWTError
@@ -9,17 +9,17 @@ from app.core import config, security
 from app.ents.employee import crud, models
 from app.ents.user.dependencies import get_db
 
+# * Storing JWT in cookies
 reusable_oauth2 = OAuth2PasswordBearer(
     tokenUrl=f"{config.settings.API_STR}/employees/login/access-token"
 )
 
-
 def get_current_employee(
-    db: Session = Depends(get_db), auth_token: str = Depends(reusable_oauth2)
+    db: Session = Depends(get_db), access_token: str = Cookie()
 ) -> models.Employee:
     try:
         payload = jwt.decode(
-            token=auth_token, key=config.settings.SECRET_KEY, algorithms=[
+            token=access_token, key=config.settings.SECRET_KEY, algorithms=[
                 "HS256"]
         )
         token_data = security.TokenPayload(**payload)

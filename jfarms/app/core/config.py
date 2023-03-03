@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 2  # 60 * 24 * 8  # 8 days
     SERVER_NAME: str = "localhost"
     SERVER_HOST: AnyHttpUrl = parse_obj_as(AnyHttpUrl, "http://127.0.0.1:8000")
-    BACKEND_CORS_ORIGINS: list[AnyHttpUrl] = ["http://localhost:3000"]
+    BACKEND_CORS_ORIGINS: list[AnyHttpUrl] = ["http://localhost:3000", ]
 
     @validator("BACKEND_CORS_ORIGINS", pre=True)
     def assemble_cors_origins(cls, v: Union[str, list[str]]) -> Union[list[str], str]:

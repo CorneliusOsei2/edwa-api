@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.ents import user
 from app.ents.employee import auth, crud, dependencies, models, schema
-from app.ents.user.dependencies import get_current_user
+from app.ents.employee.dependencies import get_current_employee
 
 router = APIRouter(prefix="/employees")
 
@@ -16,9 +16,11 @@ def login_employee(response: Response, token=Depends(auth.login_access_token)) -
     """
     Log Employee in.
     """
-    response.headers[
-        "Authorization"
-    ] = f'{token.get("type")} {token.get("access_token")}'
+    # response.headers[
+    #     "Authorization"
+    # ] = f'{token.get("type")} {token.get("access_token")}'
+    response.set_cookie(
+        key ="access_token", value= token.get("access_token"), samesite=None)
     return token
 
 
@@ -27,7 +29,7 @@ def get_employees(
     db: Session = Depends(dependencies.get_db),
     skip: int = 0,
     limit: int = 100,
-    _: str = Depends(dependencies.get_current_employee),
+    # _: str = Depends(dependencies.get_current_employee),
 ) -> Any:
     """
     Retrieve Employees.
@@ -41,7 +43,7 @@ def create_employee(
     *,
     db: Session = Depends(dependencies.get_db),
     employee_in: schema.EmployeeCreate,
-    _=Depends(get_current_user),
+    # _=Depends(get_current_employee),
 ) -> Any:
     """
     Create an Employee.
@@ -73,5 +75,6 @@ def update_employee(
             status_code=404,
             detail="The employee with this employee name does not exist in the system",
         )
-    employee = crud.employee.update(db, db_obj=employee, employee_in=employee_in)
+    employee = crud.employee.update(
+        db, db_obj=employee, employee_in=employee_in)
     return user

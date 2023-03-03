@@ -9,10 +9,11 @@ from app.core.config import settings
 from app.core.security import Token, security
 from app.ents.employee import crud, dependencies, models, schema
 
-router = APIRouter()
+router = APIRouter(prefix="/employees")
 
 
-@router.post("/employees/login/access-token", response_model=Token)
+
+@router.post("/login/access-token", response_model=Token)
 def login_access_token(
     db: Session = Depends(dependencies.get_db),
     form_data: OAuth2PasswordRequestForm = Depends(),
@@ -39,7 +40,7 @@ def login_access_token(
     }
 
 
-@router.post("/employees/login/test-token", response_model=schema.EmployeeRead)
+@router.post("/login/test-token", response_model=schema.EmployeeRead)
 def test_token(
     current_employee: models.Employee = Depends(
         dependencies.get_current_employee),

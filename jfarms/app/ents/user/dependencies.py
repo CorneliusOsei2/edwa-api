@@ -1,6 +1,6 @@
 from typing import Generator
 
-from fastapi import Depends, Header, HTTPException, status
+from fastapi import Cookie, Depends, Header, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
 from jose.exceptions import JWTError
@@ -27,11 +27,11 @@ def get_db() -> Generator:
 
 
 def get_current_user(
-    db: Session = Depends(get_db), authorization: str = Depends(reusable_oauth2)
+    db: Session = Depends(get_db), access_token: str = Cookie()
 ) -> models.User:
     try:
         payload = jwt.decode(
-            token=authorization, key=config.settings.SECRET_KEY, algorithms=[
+            token=access_token, key=config.settings.SECRET_KEY, algorithms=[
                 "HS256"]
         )
         token_data = security.TokenPayload(**payload)
