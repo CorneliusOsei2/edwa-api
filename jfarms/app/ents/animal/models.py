@@ -26,6 +26,6 @@ class Animal(Base):  # type: ignore
     gender = Column(String, nullable=False)
     location = Column(String, nullable=False)
     is_alive = Column(Boolean(), default=True)
-    health = Column(Integer, ForeignKey("health.id"))
-    issues = Column(Integer, ForeignKey("issues.id"))
+    health = Column(Integer, ForeignKey("health.id"), cascade="delete")
+    issues = Column(Integer, ForeignKey("issues.id"), cascade="delete")
     notes = Column(String, nullable=True)

@@ -12,10 +12,8 @@ from app.ents.user.schema import Role, UserCreate
 
 
 def init_db(db: Session) -> None:
-    # Tables should be created with Alembic migrations
-    # But if you don't want to use migrations, create
-    # the tables un-commenting the next line
-    Base.metadata.create_all(bind=engine)
+    # * If creating without Alembic
+    # Base.metadata.create_all(bind=engine)
 
     superuser = user.crud.user.read_by_email(db, email=settings.FIRST_SUPERUSER_EMAIL)
     if not superuser:
