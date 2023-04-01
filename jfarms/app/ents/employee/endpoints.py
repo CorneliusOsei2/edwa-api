@@ -6,7 +6,6 @@ from sqlalchemy.orm import Session
 
 from app.ents import user
 from app.ents.employee import auth, crud, dependencies, models, schema
-from app.ents.employee.dependencies import get_current_employee
 
 router = APIRouter(prefix="/employees")
 

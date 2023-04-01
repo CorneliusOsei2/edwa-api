@@ -12,7 +12,6 @@ from app.ents.employee import crud, dependencies, models, schema
 router = APIRouter(prefix="/employees")
 
 
-
 @router.post("/login/access-token", response_model=Token)
 def login_access_token(
     db: Session = Depends(dependencies.get_db),
@@ -25,13 +24,10 @@ def login_access_token(
         db, email=form_data.username, password=form_data.password
     )
     if not employee:
-        raise HTTPException(
-            status_code=400, detail="Incorrect email or password")
+        raise HTTPException(status_code=400, detail="Incorrect email or password")
     elif not crud.employee.is_active(employee):
         raise HTTPException(status_code=400, detail="Inactive user")
-    access_token_expires = timedelta(
-        minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
-    )
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     return {
         "access_token": security.create_access_token(
             employee.id, expires_delta=access_token_expires
@@ -42,8 +38,7 @@ def login_access_token(
 
 @router.post("/login/test-token", response_model=schema.EmployeeRead)
 def test_token(
-    current_employee: models.Employee = Depends(
-        dependencies.get_current_employee),
+    current_employee: models.Employee = Depends(dependencies.get_current_employee),
 ) -> Any:
     """
     Test access token
