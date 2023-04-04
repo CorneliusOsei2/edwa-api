@@ -5,6 +5,11 @@ description = "API for Jadaad Farms"
 authors = ["CorneliusOsei2 <oseiowusuboatengcornelius6@gmail.com>"]
 readme = "README.md"
 
+[project]
+dynamic = ["dependencies"]
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
 [tool.poetry.dependencies]
 python = "^3.10"
 fastapi = "^0.92.0"

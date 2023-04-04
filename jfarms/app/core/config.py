@@ -17,8 +17,10 @@ class Settings(BaseSettings):
     AUTHJWT_SECRET_KEY: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 2  # 60 * 24 * 8  # 8 days
     SERVER_NAME: str = "localhost"
-    SERVER_HOST: AnyHttpUrl = parse_obj_as(AnyHttpUrl, "http://127.0.0.1:8000")
-    BACKEND_CORS_ORIGINS: list[AnyHttpUrl] = ["http://localhost:3000", ]
+    SERVER_HOST: str
+    BACKEND_CORS_ORIGINS: list[AnyHttpUrl] = [
+        "http://localhost:3000",
+    ]
 
     @validator("BACKEND_CORS_ORIGINS", pre=True)
     def assemble_cors_origins(cls, v: Union[str, list[str]]) -> Union[list[str], str]:
@@ -43,7 +45,8 @@ class Settings(BaseSettings):
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str
     POSTGRES_DB: str
-    SQLALCHEMY_DATABASE_URI: Optional[PostgresDsn] = None
+    SQLALCHEMY_DATABASE_URI: Optional[PostgresDsn]
+    SQLALCHEMY_TRACK_MODIFICATIONS: bool = False
 
     @validator("SQLALCHEMY_DATABASE_URI", pre=True)
     def assemble_db_connection(cls, v: Optional[str], values: dict[str, Any]) -> Any:
@@ -53,7 +56,7 @@ class Settings(BaseSettings):
             scheme="postgresql",
             user=values.get("POSTGRES_USER"),
             password=values.get("POSTGRES_PASSWORD"),
-            host=values.get("POSTGRES_HOST"),
+            host=values.get("POSTGRES_HOST"),  # type: ignore
             path=f"/{values.get('POSTGRES_DB') or ''}",
         )
 

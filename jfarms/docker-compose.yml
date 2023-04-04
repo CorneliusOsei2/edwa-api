@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:13
+    env_file:
+      - .env
+  
+  alembic:
+    build: .
+    command: alembic upgrade head
+    environment:
+      DATABASE_URL: postgresql://jfarms:jfapi@db:5432/jfarms
+    depends_on:
+      - db
+    volumes:
+      - .:/app
+    working_dir: /app
+      
+  app:
+    build: .
+    ports:
+      - "8000:5000"
+    depends_on:
+      - db
+    env_file:
+      - .env 
+
+    
