@@ -35,6 +35,7 @@ class UserLogin(BaseModel):
     username: EmailStr
     password: str
 
+
 # Properties to receive via API on update
 
 
@@ -52,8 +53,3 @@ class UserInDBBase(UserBase):
 # Additional properties to return via API
 class UserRead(UserInDBBase):
     pass
-
-
-# Additional properties stored in DB
-class UserInDB(UserInDBBase):
-    hashed_password: str

@@ -1,4 +1,5 @@
 from datetime import datetime
+import uuid
 
 from pydantic import BaseModel, EmailStr
 
@@ -8,6 +9,8 @@ class EmployeeBase(BaseModel):
     first_name: str
     middle_name: str = ""
     last_name: str
+    image: str = ""
+    date_of_birth: str | None = ""
     contact: str = ""
     home_address: str = ""
     work_address: str = ""
@@ -42,4 +45,4 @@ class EmployeeInDB(EmployeeInDBBase):
 
 
 class EmployeeRead(EmployeeInDBBase):
-    ...
+    public_id: uuid.UUID

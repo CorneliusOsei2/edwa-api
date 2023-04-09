@@ -19,7 +19,8 @@ def login_employee(response: Response, token=Depends(auth.login_access_token)) -
     #     "Authorization"
     # ] = f'{token.get("type")} {token.get("access_token")}'
     response.set_cookie(
-        key ="access_token", value= token.get("access_token"), samesite=None)
+        key="access_token", value=token.get("access_token"), samesite=None
+    )
     return token
 
 
@@ -74,6 +75,5 @@ def update_employee(
             status_code=404,
             detail="The employee with this employee name does not exist in the system",
         )
-    employee = crud.employee.update(
-        db, db_obj=employee, employee_in=employee_in)
+    employee = crud.employee.update(db, db_obj=employee, employee_in=employee_in)
     return user

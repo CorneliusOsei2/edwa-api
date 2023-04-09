@@ -1,9 +1,7 @@
-from fastapi import FastAPI, Header
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response
 from app.core.config import settings
 from app.ents.api import api_router
-from app.prestart import initial_data
 
 
 def create_app():
@@ -17,8 +15,7 @@ def enable_cors(app):
     if settings.BACKEND_CORS_ORIGINS:
         app.add_middleware(
             CORSMiddleware,
-            allow_origins=[str(origin)
-                           for origin in settings.BACKEND_CORS_ORIGINS],
+            allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
             allow_credentials=True,
             allow_methods=["*"],
             allow_headers=["*"],
@@ -31,9 +28,5 @@ app.include_router(api_router, prefix=settings.API_STR)
 
 
 @app.get("/")
-def greet(response: Response, authorization=Header()):
-    response.headers["Authorization"] = authorization
+def greet():
     return "Hi"
-
-
-initial_data.main()

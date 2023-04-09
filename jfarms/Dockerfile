@@ -1,6 +1,6 @@
 FROM tiangolo/uvicorn-gunicorn-fastapi:python3.10
 
-WORKDIR /app/
+WORKDIR /app
 
 # Copy the requirements file into the container at /app
 COPY requirements.txt .
@@ -9,4 +9,10 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . /app
+
+ENV PYTHONPATH=/app
+
+
+EXPOSE 8000
+
 

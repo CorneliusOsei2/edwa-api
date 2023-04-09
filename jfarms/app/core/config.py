@@ -12,11 +12,10 @@ from pydantic import (
 
 
 class Settings(BaseSettings):
-    API_STR: str = "/jfarms"
+    API_STR: str
     SECRET_KEY: str
     AUTHJWT_SECRET_KEY: str
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 2  # 60 * 24 * 8  # 8 days
-    SERVER_NAME: str = "localhost"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int
     SERVER_HOST: str
     BACKEND_CORS_ORIGINS: list[AnyHttpUrl] = [
         "http://localhost:3000",

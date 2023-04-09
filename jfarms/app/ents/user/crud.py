@@ -22,10 +22,10 @@ class CRUDUser(crud_base.CRUDBase[models.User, schema.UserCreate, schema.UserUpd
             .all()
         )
 
-    def create(self, db: Session, *, obj_in: schema.UserCreate) -> models.User:
+    def create(self, db: Session, *, obj_in: schema.UserCreate) -> schema.UserRead:
         db_obj = models.User(
             email=obj_in.email,
-            hashed_password=security.get_password_hash(obj_in.password),
+            password=security.get_password_hash(obj_in.password),
             full_name=obj_in.full_name,
             role=obj_in.role,
             is_superuser=obj_in.is_superuser,
@@ -49,8 +49,7 @@ class CRUDUser(crud_base.CRUDBase[models.User, schema.UserCreate, schema.UserUpd
         else:
             update_data = obj_in.dict(exclude_unset=True)
         if update_data["password"]:
-            hashed_password = security.get_password_hash(
-                update_data["password"])
+            hashed_password = security.get_password_hash(update_data["password"])
             del update_data["password"]
             update_data["hashed_password"] = hashed_password
         return super().update(db, db_obj=db_obj, obj_in=update_data)
