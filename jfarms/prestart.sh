@@ -3,7 +3,6 @@
 # Let the DB start
 python ./app/prestart/db_start.py
 
-# Create initial tables
 alembic revision --autogenerate -m "Tables revision"
 
 # Run migrations

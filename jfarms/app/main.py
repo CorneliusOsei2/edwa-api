@@ -25,8 +25,3 @@ def enable_cors(app):
 app = create_app()
 enable_cors(app)
 app.include_router(api_router, prefix=settings.API_STR)
-
-
-@app.get("/")
-def greet():
-    return "Hi"

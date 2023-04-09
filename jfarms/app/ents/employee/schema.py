@@ -33,7 +33,6 @@ class EmployeeUpdate(EmployeeBase):
 
 class EmployeeInDBBase(EmployeeBase):
     id: int | None = None
-    username: str = ""
     full_name: str = ""
 
     class Config:

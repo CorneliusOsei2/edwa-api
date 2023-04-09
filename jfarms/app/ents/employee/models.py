@@ -46,7 +46,7 @@ employees_sales = Table(
 
 class Employee(Base):
     __tablename__ = "employees"
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    id = Column(Integer, primary_key=True, default=uuid.uuid4, index=True)
     public_id = Column(UUID(as_uuid=True), default=uuid.uuid4, index=True)
     image = Column(String, nullable=True)
     first_name = Column(String, index=True, nullable=False)
@@ -54,7 +54,6 @@ class Employee(Base):
     last_name = Column(String, index=True, nullable=False)
     full_name = Column(String, index=True, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
-    username = Column(String, unique=True, index=True, nullable=False)
     contact = Column(String, unique=False, nullable=False)
     home_address = Column(String, nullable=False)
     password = Column(String, nullable=False)
@@ -81,7 +80,6 @@ class Employee(Base):
         last_name,
         full_name,
         email,
-        username,
         contact,
         home_address,
         work_address,
@@ -101,7 +99,6 @@ class Employee(Base):
         self.last_name = last_name
         self.full_name = full_name
         self.email = email
-        self.username = username
         self.contact = contact
         self.home_address = home_address
         self.password = password

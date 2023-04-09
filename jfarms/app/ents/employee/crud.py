@@ -21,12 +21,6 @@ class CRUDEmployee(
     def get_full_name(self, employee_in: schema.EmployeeCreate) -> str:
         return f"{employee_in.first_name} {employee_in.middle_name} {employee_in.last_name}"
 
-    def _get_username(self, db: Session, employee_in: schema.EmployeeCreate) -> str:
-        last_employee = (
-            db.query(models.Employee).order_by(models.Employee.id.desc()).first()
-        )
-        return f"{employee_in.first_name[0]}{employee_in.last_name[0]}{str(last_employee.id if last_employee else 1)}"
-
     def create(
         self, db: Session, *, employee_in: schema.EmployeeCreate
     ) -> models.Employee:
@@ -34,7 +28,6 @@ class CRUDEmployee(
         employee = models.Employee(
             **(employee_in.dict()),
             full_name=self.get_full_name(employee_in),
-            username=self._get_username(db, employee_in),
         )
 
         db.add(employee)

@@ -1,25 +1,20 @@
-from datetime import timedelta
 from typing import Any
 
 from fastapi import APIRouter, Body, Depends, Form, HTTPException
-from fastapi.encoders import jsonable_encoder
 from pydantic.networks import EmailStr
 from sqlalchemy.orm import Session
 
-from app.core import config, security
 from app.core.config import settings
-from app.ents.employee.schema import EmployeeCreate
 from app.ents.user import crud, dependencies, models, schema
 from app.ents.user.dependencies import get_db
 from app.ents.user.login import login_access_token
-from app.ents.user.schema import UserLogin
 from app.utilities import utils
 
 router = APIRouter(prefix="/users")
 
 
 @router.post("/login")
-def login_user(username=Form(), password=Form(), db: Session = Depends(get_db), token=Depends(login_access_token)) -> Any:
+def login_user(token=Depends(login_access_token)) -> Any:
     """
     Retrieve Individual Clients.
     """
@@ -31,8 +26,7 @@ def get_users(
     db: Session = Depends(dependencies.get_db),
     skip: int = 0,
     limit: int = 100,
-    current_user: models.User = Depends(
-        dependencies.get_current_active_superuser),
+    current_user: models.User = Depends(dependencies.get_current_active_superuser),
 ) -> Any:
     """
     Retrieve Individual Clients.
@@ -48,8 +42,7 @@ def get_business_clients(
     db: Session = Depends(dependencies.get_db),
     skip: int = 0,
     limit: int = 100,
-    current_user: models.User = Depends(
-        dependencies.get_current_active_superuser),
+    current_user: models.User = Depends(dependencies.get_current_active_superuser),
 ) -> Any:
     """
     Retrieve Business Clients.
@@ -65,8 +58,7 @@ def create_user(
     *,
     db: Session = Depends(dependencies.get_db),
     user_in: schema.UserCreate,
-    current_user: models.User = Depends(
-        dependencies.get_current_active_superuser),
+    current_user: models.User = Depends(dependencies.get_current_active_superuser),
 ) -> Any:
     """
     Create a Client.
@@ -140,8 +132,7 @@ def update_user(
     db: Session = Depends(dependencies.get_db),
     user_id: int,
     user_in: schema.UserUpdate,
-    current_user: models.User = Depends(
-        dependencies.get_current_active_superuser),
+    current_user: models.User = Depends(dependencies.get_current_active_superuser),
 ) -> Any:
     """
     Update a user.
