@@ -20,9 +20,9 @@ class TokenPayload(BaseModel):
 class Security:
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-    def create_access_token(self,
-                            subject: str | Any, expires_delta: timedelta | None = None
-                            ) -> str:
+    def create_access_token(
+        self, subject: str | Any, expires_delta: timedelta | None = None
+    ) -> str:
         """Creates an access token
 
         Args:

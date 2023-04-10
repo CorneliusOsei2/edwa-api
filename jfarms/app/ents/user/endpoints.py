@@ -1,12 +1,11 @@
 from typing import Any
 
-from fastapi import APIRouter, Body, Depends, Form, HTTPException
+from fastapi import APIRouter, Body, Depends, HTTPException
 from pydantic.networks import EmailStr
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.ents.user import crud, dependencies, models, schema
-from app.ents.user.dependencies import get_db
 from app.ents.user.login import login_access_token
 from app.utilities import utils
 

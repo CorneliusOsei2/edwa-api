@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.base import crud_base
 from app.core.security import security
-from app.ents.user import crud, models, schema
+from app.ents.user import models, schema
 
 
 class CRUDUser(crud_base.CRUDBase[models.User, schema.UserCreate, schema.UserUpdate]):

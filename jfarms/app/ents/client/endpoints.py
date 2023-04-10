@@ -1,13 +1,11 @@
 from typing import Any
 
-from fastapi import APIRouter, Body, Depends, Form, HTTPException
-from fastapi.encoders import jsonable_encoder
-from pydantic.networks import EmailStr
+from fastapi import APIRouter, Depends, Form, HTTPException
 from sqlalchemy.orm import Session
 
 import app.ents.user as user
 from app.core.config import settings
-from app.ents.client import crud, dependencies, models, schema
+from app.ents.client import crud, dependencies, schema
 from app.ents.client.login import login_access_token
 from app.ents.user.dependencies import get_db
 from app.utilities import utils
@@ -16,7 +14,12 @@ router = APIRouter()
 
 
 @router.post("/login")
-def login_client(username=Form(), password=Form(), db: Session = Depends(get_db), token=Depends(login_access_token)) -> Any:
+def login_client(
+    username=Form(),
+    password=Form(),
+    db: Session = Depends(get_db),
+    token=Depends(login_access_token),
+) -> Any:
     """
     Log Client in.
     """
@@ -28,8 +31,7 @@ def get_clients(
     db: Session = Depends(dependencies.get_db),
     skip: int = 0,
     limit: int = 100,
-    _: user.models.User = Depends(
-        user.dependencies.get_current_active_superuser),
+    _: user.models.User = Depends(user.dependencies.get_current_active_superuser),
 ) -> Any:
     """
     Retrieve Clients.
@@ -43,8 +45,7 @@ def create_client(
     *,
     db: Session = Depends(dependencies.get_db),
     user_in: schema.ClientCreate,
-    _: user.models.User = Depends(
-        user.dependencies.get_current_active_superuser),
+    _: user.models.User = Depends(user.dependencies.get_current_active_superuser),
 ) -> Any:
     """
     Create an Client.
@@ -69,8 +70,7 @@ def update_client(
     db: Session = Depends(dependencies.get_db),
     user_id: int,
     user_in: schema.ClientUpdate,
-    _: user.models.User = Depends(
-        user.dependencies.get_current_active_superuser),
+    _: user.models.User = Depends(user.dependencies.get_current_active_superuser),
 ) -> Any:
     """
     Update Client.

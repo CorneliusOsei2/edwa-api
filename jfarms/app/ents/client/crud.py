@@ -1,7 +1,6 @@
 from typing import Any
 
 from sqlalchemy.orm import Session
-from typing_extensions import override
 
 from app.base import crud_base
 from app.core.security import security

@@ -1,6 +1,6 @@
 import logging
-from sqlalchemy import text
 
+from sqlalchemy import text
 from tenacity import retry
 from tenacity.after import after_log
 from tenacity.before import before_log

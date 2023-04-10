@@ -1,14 +1,7 @@
 from typing import Any, Optional, Union
 
-from pydantic import (
-    AnyHttpUrl,
-    BaseSettings,
-    EmailStr,
-    HttpUrl,
-    PostgresDsn,
-    parse_obj_as,
-    validator,
-)
+from pydantic import (AnyHttpUrl, BaseSettings, EmailStr, HttpUrl, PostgresDsn,
+                      validator)
 
 
 class Settings(BaseSettings):

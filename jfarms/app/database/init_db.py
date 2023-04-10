@@ -2,8 +2,6 @@ from sqlalchemy.orm import Session
 
 import app.ents.user as user
 from app.core.config import settings
-from app.database.base import Base
-from app.database.session import engine
 from app.ents.user.schema import Role, UserCreate
 
 # make sure all SQL Alchemy models are imported (app.database.base) before initializing DB

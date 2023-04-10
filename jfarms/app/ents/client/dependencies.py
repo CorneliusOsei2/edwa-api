@@ -1,5 +1,3 @@
-from typing import Generator
-
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
@@ -9,7 +7,6 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.security import TokenPayload
-from app.database.session import SessionLocal
 from app.ents.client import crud, models
 from app.ents.user.dependencies import get_db
 
@@ -22,8 +19,7 @@ def get_current_client(
     db: Session = Depends(get_db), token: str = Depends(reusable_oauth2)
 ) -> models.Client:
     try:
-        payload = jwt.decode(
-            token=token, key=settings.SECRET_KEY, algorithms=["HS256"])
+        payload = jwt.decode(token=token, key=settings.SECRET_KEY, algorithms=["HS256"])
         token_data = TokenPayload(**payload)
     except (JWTError, ValidationError):
         raise HTTPException(

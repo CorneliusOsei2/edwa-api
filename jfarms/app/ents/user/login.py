@@ -25,8 +25,7 @@ def login_access_token(
         db, email=form_data.username, password=form_data.password
     )
     if not user:
-        raise HTTPException(
-            status_code=400, detail="Incorrect email or password")
+        raise HTTPException(status_code=400, detail="Incorrect email or password")
     elif not crud.user.is_active(user):
         raise HTTPException(status_code=400, detail="Inactive user")
     access_token_expires = timedelta(
@@ -65,7 +64,9 @@ def recover_password(email: str, db: Session = Depends(dependencies.get_db)) -> 
     password_reset_token = utils.generate_password_reset_token(email=email)
     utils.send_reset_password_email(
         # type: ignore  Column--warning
-        email_to=user.email, email=email, token=password_reset_token
+        email_to=user.email,
+        email=email,
+        token=password_reset_token,
     )
     return {"schemas.Msg": "Password recovery email sent"}
 
